@@ -1821,3 +1821,123 @@ const personAccount = {
     }
 }
 */
+
+//Day 15
+//Exercise 1
+// /*
+const countriesAPI = 'https://restcountries.com/v2/all'
+let fetchData = async () => {
+    try{
+        const response = await fetch(countriesAPI)
+        const data = await response.json()
+        const countryDetails = []
+
+        for (const country of data) {
+            countryDetails.push(
+                {
+                    name: country.name, 
+                    capital: country.capital, 
+                    languages: country.languages, 
+                    population: country.population, 
+                    area: country.area
+                }
+            )
+        }
+
+        console.log(countryDetails)
+    }catch(e){
+        console.error(e)
+    }
+}
+
+fetchData()
+// */
+
+//Exercise 2
+// /*
+const catsAPI = 'https://api.thecatapi.com/v1/breeds'
+fetchData = async () => {
+    try {
+        const response = await fetch(catsAPI)
+        const data = await response.json()
+        const catNames = []
+
+        for (const cats of data) {
+            catNames.push(cats.name)    
+        }
+
+        console.log(catNames)
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+fetchData()
+// */
+
+//Exercise 3
+// /*
+fetchData = async () => {
+    try {
+        const response = await fetch(catsAPI)
+        const data = await response.json()
+        const catWeights = []
+
+        for (const cats of data) {
+            catWeights.push(parseInt(cats.weight.metric))    
+        }
+
+        const averageWeight = Math.round(catWeights.reduce((a,b) => a + b) / catWeights.length)
+
+        console.log(averageWeight)
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+fetchData()
+
+fetchData = async () => {
+    try{
+        const response = await fetch(countriesAPI)
+        const data = await response.json()
+        const countryDetails = []
+
+        for (const country of data) {
+            countryDetails.push(
+                {
+                    name: country.name, 
+                    capital: country.capital, 
+                    languages: country.languages, 
+                    population: country.population, 
+                    area: country.area
+                }
+            )
+        }
+
+        const largestCountries = () => {
+            countryDetails.sort((countryA, countryB) => countryB.area - countryA.area)
+            for (let i = 0; i < 10; i++) {
+                console.log(countryDetails[i])
+            }
+        }
+
+        largestCountries()
+
+        const numberOfLanguages = () => {
+            let n = 0
+            for (const value of countryDetails) {
+                n += value.languages.length
+            }
+            return n
+        }
+
+        console.log(numberOfLanguages())
+
+    }catch(e){
+        console.error(e)
+    }
+}
+
+fetchData()
+// */
