@@ -1,6 +1,6 @@
 //Creating promises
 // Promise
-// /*
+/*
 let doPromise = new Promise((resolve, reject) => {
   setTimeout(() => {
     const skills = ['HTML', 'CSS', 'JS']
@@ -35,24 +35,25 @@ doPromise
         console.log(result)
     })
     .catch(error => console.log(error))
-    // */
+    */
 
 //fetch()
-// /*
+/*
 const url = 'https://restcountries.com/v2/all'
 
 fetch(url)
     .then(response => response.json())
     .then(data => console.log(data))
     .catch(error => console.error(error))
-// */
+*/
 
 //Async/Await
-// const square = async function (n) {
-//     return n * n
-// }
-// let value = await square(2)
-// console.log(value)
+/*
+const square = async function (n) {
+    return n * n
+}
+let value = await square(2)
+console.log(value)
 
 const fetchData = async () => {
     try{
@@ -66,3 +67,4 @@ const fetchData = async () => {
 }
 
 fetchData()
+*/

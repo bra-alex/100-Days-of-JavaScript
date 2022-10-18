@@ -1824,7 +1824,7 @@ const personAccount = {
 
 //Day 15
 //Exercise 1
-// /*
+/*
 const countriesAPI = 'https://restcountries.com/v2/all'
 let fetchData = async () => {
     try{
@@ -1851,10 +1851,10 @@ let fetchData = async () => {
 }
 
 fetchData()
-// */
+*/
 
 //Exercise 2
-// /*
+/*
 const catsAPI = 'https://api.thecatapi.com/v1/breeds'
 fetchData = async () => {
     try {
@@ -1873,10 +1873,10 @@ fetchData = async () => {
 }
 
 fetchData()
-// */
+*/
 
 //Exercise 3
-// /*
+/*
 fetchData = async () => {
     try {
         const response = await fetch(catsAPI)
@@ -1940,4 +1940,48 @@ fetchData = async () => {
 }
 
 fetchData()
-// */
+*/
+
+
+//Day 16
+//Stopwatch
+
+function Stopwatch() {
+    let duration = 0.000
+    let running = false
+
+    Object.defineProperty(this, 'duration', {
+        get: function(){
+            return +duration.toFixed(4)
+        }
+    })
+
+    this.reset = () => {
+        duration = 0
+    }
+
+    let time = () => {
+        setInterval(() => {
+            if(running)
+                duration += 0.001
+        }, 1)
+    }
+
+    this.start = () => {
+        if (running)
+            throw new Error('Stopwatch already started')
+        
+        running = true
+        time()
+    }
+
+    this.stop = () => {
+        if(!running)
+            throw new Error('Stopwatch not started')
+
+        running = false
+        time()
+    }
+}
+
+const sw = new Stopwatch()
