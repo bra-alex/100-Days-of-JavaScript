@@ -173,7 +173,7 @@ class Circle {
 // module.exports = Circle;
 
 //ES6
-// /*
+/*
 const _defaultLocation = new WeakMap()
 const _draw = new WeakMap()
 
@@ -195,4 +195,4 @@ export class Circle {
         _defaultLocation.set(this, value)
     }
 }
-// */
+*/
