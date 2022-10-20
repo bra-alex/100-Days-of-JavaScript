@@ -2042,3 +2042,35 @@ for (const element of elements) {
     console.log(element.render())
 }
 */
+
+//Day 18
+const _items = new WeakMap
+class Stack{
+    constructor(){
+        _items.set(this, [])
+    }
+
+    get count(){
+        return _items.get(this).length
+    }
+
+    peek(){
+        if(this.count === 0)
+            throw new Error('Stack is empty')
+
+        return _items.get(this)[this.count - 1]
+    }
+
+    pop(){
+        if(this.count === 0)
+            throw new Error('Stack is empty')
+
+        return _items.get(this).pop() 
+    }
+
+    push(obj){
+        _items.get(this).push(obj)
+    }
+}
+
+const s = new Stack()

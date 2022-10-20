@@ -87,6 +87,7 @@ for (const shape of shapes) {
 */
 
 //Mixins
+/*
 function mixin(Type, ...values){
     Object.assign(Type.prototype, ...values)
 }
@@ -120,3 +121,78 @@ mixin(Fish, canEat, canSwim)
 
 const person = new Person()
 const fish = new Fish()
+*/
+
+
+//Classes
+//Private properties using Symbol()
+/*
+const _defaultLocation = Symbol()
+const _draw = Symbol()
+
+class Circle {
+    constructor(radius) {
+        // Instance Members
+        this.radius = radius
+        this[_defaultLocation] = { x: 0, y: 0 }
+    }
+
+    [_draw]() {
+
+    }
+}
+*/
+
+//Private Properties using weakmap
+/*
+const _defaultLocation = new WeakMap()
+const _draw = new WeakMap()
+
+class Circle {
+    constructor(radius) {
+        // Instance Members
+        this.radius = radius
+        _defaultLocation.set(this, { x: 0, y: 0 })
+        _draw.set(this, () => {
+            console.log("draw")
+        })
+    }
+
+    get defaultLocation() {
+        return _defaultLocation.get(this)
+    }
+
+    set defaultLocation(value) {
+        _defaultLocation.set(this, value)
+    }
+}
+*/
+
+//Modules   
+//CommonJS
+// module.exports = Circle;
+
+//ES6
+// /*
+const _defaultLocation = new WeakMap()
+const _draw = new WeakMap()
+
+export class Circle {
+    constructor(radius) {
+        // Instance Members
+        this.radius = radius
+        _defaultLocation.set(this, { x: 0, y: 0 })
+        _draw.set(this, () => {
+            console.log("draw")
+        })
+    }
+
+    get defaultLocation() {
+        return _defaultLocation.get(this)
+    }
+
+    set defaultLocation(value) {
+        _defaultLocation.set(this, value)
+    }
+}
+// */
