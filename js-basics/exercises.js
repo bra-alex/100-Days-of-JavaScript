@@ -2044,6 +2044,7 @@ for (const element of elements) {
 */
 
 //Day 18
+/*
 const _items = new WeakMap
 class Stack{
     constructor(){
@@ -2074,3 +2075,85 @@ class Stack{
 }
 
 const s = new Stack()
+*/
+
+//Day 19
+//Exercise 1
+/*
+let firstParagraph = document.querySelector('p')
+console.log(firstParagraph)
+
+let paragraphs = document.getElementsByTagName('p')
+console.log(paragraphs[0])
+
+firstParagraph = document.querySelector('#first-paragraph')
+console.log(firstParagraph)
+
+paragraphs = document.getElementById('first-paragraph')
+console.log(paragraphs)
+
+paragraphs = document.querySelectorAll('p')
+paragraphs.forEach(paragraph => console.log(paragraph.textContent));
+
+paragraphs[3].textContent = 'Fourth Paragraph'
+*/
+
+//Exercise 2
+/*
+paragraphs[0].style.backgroundColor = 'red'
+paragraphs[1].style.color = 'blue'
+paragraphs[2].style.fontFamily = 'Helvetica'
+paragraphs[3].style.fontSize = '66px'
+
+paragraphs.forEach((paragraph, i) => {
+    if(i % 2 === 0){
+        paragraph.style.color = 'green'
+    }else{
+        paragraph.style.color = 'red'
+    }
+})
+
+paragraphs[0].textContent = 'red'
+paragraphs[0].id = 'red'
+paragraphs[0].className = 'red'
+
+paragraphs[1].textContent = 'blue'
+paragraphs[1].id = 'blue'
+paragraphs[1].className = 'blue'
+
+paragraphs[2].textContent = 'Helvetica'
+paragraphs[2].id = 'Helvetica'
+paragraphs[2].className = 'Helvetica'
+
+paragraphs[3].textContent = '66px'
+paragraphs[3].id = '66px'
+paragraphs[3].className = '66px'
+*/
+
+//Exercise 3
+/*
+const h1 = document.querySelector('h1')
+h1.innerHTML = ''
+h1.innerHTML = 'Asabeneh Yetayeh challenges in <span>2020</span>'
+
+const year = document.querySelector('span')
+
+const colors = ['red', 'blue', 'green', 'pink', 'purple', 'cyan', 'teal', 'yellow', 'gray']
+
+setInterval(() => {
+    const index = Math.floor(Math.random() * colors.length)
+    year.style.color = colors[index]
+}, 1000)
+
+const li = document.querySelectorAll('li')
+
+li.forEach(v => {
+    if(v.textContent.includes('Done')){
+        v.style.backgroundColor = 'green'
+    }else if(v.textContent.includes('Ongoing')){
+        v.style.backgroundColor = 'yellow'
+    }else{
+        v.style.backgroundColor = 'red'
+    }
+})
+*/
