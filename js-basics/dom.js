@@ -113,3 +113,25 @@ titles.forEach((title, i) => {
     }
 })
 */
+
+//Creating an Element
+let title = document.createElement('h1')
+title.className = 'title'
+title.textContent = 'Title 1'
+document.body.appendChild(title)
+
+//Creating Elements
+let j = 0
+for (let i = 2; i <= 21; i++) {
+    
+    title = document.createElement(`h${i - j}`)
+
+    if(i % 3 === 0){
+        j += 3
+    }
+    
+    title.className = 'title'
+    title.textContent = `Title ${i}`
+    
+    document.body.appendChild(title)
+}

@@ -2157,3 +2157,270 @@ li.forEach(v => {
     }
 })
 */
+
+//Day 20
+//Exercise 1
+// /*
+let div = document.querySelector('.wrapper')
+
+const isPrime = (number) => {
+    if(number === 2){
+        return true
+    }
+
+    if(number > 2){
+        for(let i = 2; i < number; i++){
+            if(number % i === 0){
+                return false
+            }
+        }
+        return true
+    }
+}
+
+let child
+for (let i = 0; i <= 101; i++) {
+
+    child = document.createElement('span')
+    child.textContent = i
+
+    if(isPrime(i)){
+        child.style.backgroundColor = 'red'
+    } else if(i % 2 === 0){
+        child.style.backgroundColor = 'green'
+    } else {
+        child.style.backgroundColor = 'yellow'
+    }
+    child.style.padding = '20px'
+    child.style.margin = '2px'
+    child.style.width = '30px'
+    child.style.textAlign = 'center'
+
+    div.style.display = 'flex'
+    div.style.flexDirection = 'columns'
+    div.style.flexWrap = 'wrap'
+
+    div.appendChild(child)
+}
+// */
+
+//Exercise 2
+// /*
+const h4 = document.querySelector('#total-countries')
+h4.textContent = `Total Number of Countries: ${countries.length}`
+
+div = document.querySelector('.countries-wrapper')
+
+for (let i = 0; i < countries.length; i++) {
+    child = document.createElement('span')
+    child.textContent = countries[i]
+    child.style.padding = '20px'
+    child.style.margin = '2px'
+    child.style.width = '80px'
+    child.style.textAlign = 'center'
+
+    div.style.display = 'flex'
+    div.style.flexDirection = 'columns'
+    div.style.flexWrap = 'wrap'
+    div.appendChild(child)
+}
+// */
+
+//Exercise 3
+const info = asabenehChallenges2020
+
+div = document.querySelector('.wrapper')
+
+const title = document.createElement('h1')
+title.innerHTML = `${info.challengeTitle} <span id="year">${info.challengeYear}</span>`
+
+div.appendChild(title)
+
+const year = document.querySelector('#year')
+year.style.fontSize = '50px'
+
+const colors = ['red', 'blue', 'green', 'pink', 'purple', 'cyan', 'teal', 'yellow', 'gray']
+
+setInterval(() => {
+    const index = Math.floor(Math.random() * colors.length)
+    year.style.color = colors[index]
+}, 1000)
+
+const ul = document.createElement('ul')
+
+for (const challenge of info.challenges) {
+    const li = document.createElement('li')
+
+    const nameSpan = document.createElement('span')
+    
+    const name = challenge.name
+    
+    nameSpan.textContent = name
+    nameSpan.style.width = '30%'
+    
+    const statusSpan = document.createElement('span')
+
+    const status = challenge.status
+    statusSpan.textContent = status
+    
+    const details = document.createElement('details')
+
+    const summary = document.createElement('summary')
+    summary.textContent = challenge.topics[0]
+
+    const topics = document.createElement('div')
+    topics.innerHTML = `${challenge.topics.map(title => `<div>${title}</div>`).join('')}`
+    
+    topics.style.listStyle = 'none'
+
+    details.appendChild(summary)
+    details.appendChild(topics)
+
+    details.style.width = '30%'
+    
+    const p = document.createElement('div')
+    p.appendChild(nameSpan)
+    p.appendChild(details)
+    p.appendChild(statusSpan)
+
+    if (status === 'Done') {
+        p.style.backgroundColor = 'green'
+    }else if(status === 'Ongoing'){
+        p.style.backgroundColor = 'yellow'
+    }else{
+        p.style.backgroundColor = 'red'
+    }
+
+    p.style.padding = '20px'
+    p.style.margin = '5px'
+    p.style.display = 'flex'
+    p.style.flexDirection = 'row'
+    p.style.flexGrow = '1'
+
+    li.appendChild(p)
+
+    li.style.listStyle = 'none'
+    
+    ul.style.width = '100%'
+    ul.appendChild(li)
+}
+
+div.appendChild(ul)
+
+const aboutAuthor = document.createElement('div')
+
+const authorName = document.createElement('h2')
+authorName.textContent = `${info.author.firstName} ${info.author.lastName}`
+
+authorName.style.textAlign = 'center'
+
+aboutAuthor.appendChild(authorName)
+
+for (const icon of info.author.socialLinks) {
+    const icons = document.createElement('div')
+    icons.innerHTML = icon.fontawesomeIcon
+    
+    aboutAuthor.appendChild(icons)
+}
+
+const bio = document.createElement('p')
+bio.textContent = info.author.bio
+
+bio.style.width = '70%'
+bio.style.margin = 'auto'
+bio.style.textAlign = 'center'
+
+aboutAuthor.appendChild(bio)
+
+const about = document.createElement('div')
+
+const titleSection = document.createElement('div')
+const titlesName = document.createElement('h4')
+
+titlesName.textContent = 'Titles'
+titleSection.appendChild(titlesName)
+
+for (const title of info.author.titles) {
+    
+    const t = document.createElement('div')
+    t.textContent = title.join(' ') 
+    
+    titleSection.appendChild(t)
+}
+
+titleSection.style.width = '60%'
+
+const skillsSection = document.createElement('div')
+const skillsName = document.createElement('h4')
+
+skillsName.textContent = 'Skills'
+skillsSection.appendChild(skillsName)
+
+for (const skills of info.author.skills) {
+    
+    const t = document.createElement('div')
+    t.textContent = skills
+    
+    skillsSection.appendChild(t)
+}
+
+skillsSection.style.width = '60%'
+
+const qualificationsSection = document.createElement('div')
+const qualificationsName = document.createElement('h4')
+
+qualificationsName.textContent = 'Qualifications'
+qualificationsSection.appendChild(qualificationsName)
+
+for (const qualifications of info.author.qualifications) {
+    
+    const t = document.createElement('div')
+    t.textContent = qualifications
+    
+    qualificationsSection.appendChild(t)
+}
+
+qualificationsSection.style.width = '60%'
+
+about.style.width = '80%'
+about.style.margin = 'auto'
+about.style.display = 'flex'
+about.style.flexDirection = 'columns'
+about.style.flexGrow = '1'
+
+about.appendChild(titleSection)
+about.appendChild(skillsSection)
+about.appendChild(qualificationsSection)
+
+aboutAuthor.appendChild(about)
+div.appendChild(aboutAuthor)
+
+const footer = document.createElement('div')
+const footerContent = document.createElement('div')
+const footerTitle = document.createElement('h4')
+
+footerTitle.textContent = 'Keywords'
+footer.appendChild(footerTitle)
+
+for (const keyword of info.keywords) {
+    const keywords = document.createElement('div')
+    keywords.innerHTML = `# ${keyword}`
+
+    const index = Math.floor(Math.random() * colors.length)
+
+    keywords.style.backgroundColor = colors[index]
+    keywords.style.margin = '2px'
+    keywords.style.padding = '9px'
+    keywords.style.borderRadius = '20px'
+    footerContent.appendChild(keywords)
+}
+
+footerContent.style.display = 'flex'
+footerContent.style.flexDirection = 'columns'
+footerContent.style.flexWrap = 'wrap'
+
+footer.style.width = '80%'
+footer.style.margin = 'auto'
+footer.appendChild(footerContent)
+
+div.appendChild(footer)
