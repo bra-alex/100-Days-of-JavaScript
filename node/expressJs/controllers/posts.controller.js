@@ -19,7 +19,11 @@ function postPosts(req, res) {
 }
 
 function getPosts(req, res) {
-    res.json(posts)
+    res.render('posts', {
+        title: 'Posts',
+        postName: `${posts[0].title}`,
+        post: `${posts[0].body}`
+    })
 }
 
 function getPost(req, res) {
