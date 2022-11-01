@@ -9,7 +9,7 @@ function isHabitable(planet) {
     && planet['koi_insol'] > 0.36 && planet['koi_insol'] < 1.11
     && planet['koi_prad'] < 1.6
 }
-
+ 
 function loadPlanetsData() {
     const filePath = path.join(__dirname, '..', '..', 'data', 'kepler_data.csv')
     return new Promise((resolve, reject) => {
@@ -31,7 +31,11 @@ function loadPlanetsData() {
         })
 }
 
+function getAllPlanets(){
+    return habitablePlanets
+}
+
 module.exports = {
     loadPlanetsData,
-    planets: habitablePlanets
+    getAllPlanets
 }

@@ -22,4 +22,8 @@ app.use(express.static(sitePath))
 app.use(planetsRouter)
 app.use(launchesRouter)
 
+app.get('/*',(req, res) => {
+    res.sendFile(path.join(path.join(__dirname, '..', 'public', 'index.html')))
+})
+
 module.exports = app
