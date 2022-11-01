@@ -9,7 +9,7 @@ const launch = {
     target: 'Kepler-442 b',
     launchDate: new Date(),
     customers: ['GASA', 'FWA'],
-    upcoming: false,
+    upcoming: true,
     success: true
 }
 
@@ -17,6 +17,10 @@ launches.set(launch.flightNumber, launch)
 
 function getAllLaunches(){
     return Array.from(launches.values())
+}
+
+function launchExists(launchID){
+    return launches.has(launchID)
 }
 
 function addNewLaunch(launch){
@@ -29,7 +33,17 @@ function addNewLaunch(launch){
     }))
 }
 
+function abortLaunch(launchID){
+    const aborted = launches.get(launchID)
+    aborted.upcoming = false
+    aborted.success = false
+
+    return aborted
+}
+
 module.exports = {
     getAllLaunches,
-    addNewLaunch
+    addNewLaunch,
+    launchExists,
+    abortLaunch
 }
