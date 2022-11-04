@@ -1,5 +1,4 @@
 const express = require('express')
-const cluster = require('cluster')
 
 const PORT = process.env.PORT || 3000
 
@@ -16,15 +15,10 @@ app.get('/', (req, res) => {
 })
 
 app.get('/timer', (req, res) => {
-    delay(9000)
-    res.send(`hi: ${process.pid}`)
+    delay(2000)
+    res.send(`Updated: ${process.pid}`)
 })
 
-if (cluster.isMaster){
-    console.log('Master has been started')
-    cluster.fork()
-    cluster.fork()
-} else {
-    console.log('Worker has been started')
-    app.listen(PORT, () => console.log('Listening on port', PORT))
-}
+console.log('Worker has been started')
+app.listen(PORT, () => console.log('Listening on port', PORT))
+
