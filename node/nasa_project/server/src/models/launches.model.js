@@ -21,7 +21,7 @@ const SPACEX_API_URL = 'https://api.spacexdata.com/v5/launches/query'
 
 async function populateLaunches(){
 
-    console.log('Loading launch data')
+    console.log('Uploading launch data')
 
     const response = await axios.post(SPACEX_API_URL, {
         query: {},
@@ -44,6 +44,11 @@ async function populateLaunches(){
         }
     })
 
+    if(response.status !== 200){
+        console.log('Problem downloading launch data')
+        throw new Error('Download failed')
+    }
+
     const launchDocs = response.data.docs
 
     for(const launchDoc of launchDocs) {
@@ -61,8 +66,9 @@ async function populateLaunches(){
         }
 
         console.log(`${launch.flightNumber} ${launch.mission}`)
-    }
 
+        await saveLaunch(launch)
+    }
 }
 
 async function loadLaunchData(){
@@ -106,12 +112,6 @@ async function getLatestFlightNumber(){
 
 async function saveLaunch(launchData){
     try {
-        const planet = await planets.findOne({keplerName: launchData.target})
-
-        if(!planet){
-            throw new Error('No matches found')
-        }
-
         await launches.findOneAndUpdate({
             flightNumber: launchData.flightNumber
         }, launchData, {
@@ -124,6 +124,12 @@ async function saveLaunch(launchData){
 }
 
 async function addNewLaunch(launch){
+    const planet = await planets.findOne({keplerName: launchData.target})
+
+    if(!planet){
+        throw new Error('No matches found')
+    }
+
     const newFlightNumber = await getLatestFlightNumber() + 1
     const newLaunch = Object.assign(launch, {
         flightNumber: newFlightNumber,

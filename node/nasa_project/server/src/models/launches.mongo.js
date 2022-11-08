@@ -14,8 +14,7 @@ const launchSchema = new mongoose.Schema({
         required: true
     },
     target: {
-        type: String,
-        required: true
+        type: String
     },
     launchDate: {
         type: Date,
