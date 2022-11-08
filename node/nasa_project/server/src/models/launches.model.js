@@ -6,19 +6,6 @@ const planets = require('./planets.mongo')
 const DEFAULT_FLIGHT_NUMBER = 100
 const SPACEX_API_URL = 'https://api.spacexdata.com/v5/launches/query'
 
-// const launch = {
-//     flightNumber: 100, //flight_number
-//     mission: 'Mission to the west', //name
-//     rocket: 'Explorer IS1', //rocket.name
-//     target: 'Kepler-442 b',
-//     launchDate: new Date(), //date_local
-//     customers: ['GASA', 'FWA'], //payloads.customers
-//     upcoming: true, //upcoming
-//     success: true //success
-// }
-
-// saveLaunch(launch)
-
 async function populateLaunches(){
 
     console.log('Uploading launch data')
@@ -91,11 +78,17 @@ async function findLaunch(filter){
     return await launches.findOne(filter)
 }
 
-async function getAllLaunches(){
-    return await launches.find({}, {
+async function getAllLaunches(skip, limit){
+    return await launches
+    .find({}, {
         '_id': 0, 
         '__v': 0
     })
+    .sort({
+        flightNumber: 1
+    })
+    .skip(skip)
+    .limit(limit)
 }
 
 async function getLatestFlightNumber(){
