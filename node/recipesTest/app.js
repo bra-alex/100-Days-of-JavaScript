@@ -6,6 +6,6 @@ const recipeRouter = require('./routes/recipes.route')
 
 app.use(express.json())
 
-app.use('/recipes',recipeRouter)
+app.use('/recipes', recipeRouter)
 
 module.exports = app

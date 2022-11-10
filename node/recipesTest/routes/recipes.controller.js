@@ -1,7 +1,12 @@
 const { getRecipes } = require('../model/recipes.model')
+const { getRecipe } = require('../services/query')
 
-function httpsGetRecipes(req, res){
-    return res.status(200).json(getRecipes())
+
+async function httpsGetRecipes(req, res){
+    const query = getRecipe(req.query)
+    const recipes = await getRecipes(query)
+    
+    return res.status(200).json(recipes)
 }
 
 module.exports = {
