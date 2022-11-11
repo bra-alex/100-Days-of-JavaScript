@@ -23,6 +23,7 @@ async function getRecipes(query){
 async function hasEmbeddedRecipes(obj){
     let id
     let name
+    let image
     let servings
     let timeTaken
     let instructions = [] 
@@ -31,6 +32,7 @@ async function hasEmbeddedRecipes(obj){
     for (const recipe of obj.recipes) {
         id = await getLastId() + 1
         name = recipe.name
+        image = recipe.thumbnail_url
         servings = recipe.yields
         timeTaken = recipe.total_time_minutes ? `${recipe.total_time_minutes} minutes` : 'N/A'
 
@@ -55,6 +57,7 @@ async function hasEmbeddedRecipes(obj){
         const recipeData = {
             id,
             name,
+            image,
             servings,
             timeTaken,
             instructions,
@@ -69,6 +72,8 @@ async function hasEmbeddedRecipes(obj){
         }
 
         console.log(recipeData.name)
+        console.log(recipeData.image)
+        
         await saveRecipe(recipeData)
     }
 }
@@ -76,6 +81,7 @@ async function hasEmbeddedRecipes(obj){
 async function hasRecipes(obj){
     let id = await getLastId() + 1
     let name = obj.name
+    let image = obj.thumbnail_url
     let servings = obj.yields
     let timeTaken = obj.total_time_minutes ? `${obj.total_time_minutes} minutes` : 'N/A'
     let instructions = [] 
@@ -102,6 +108,7 @@ async function hasRecipes(obj){
     const recipeData = {
         id,
         name,
+        image,
         servings,
         timeTaken,
         instructions,
@@ -116,6 +123,8 @@ async function hasRecipes(obj){
     }
 
     console.log(recipeData.name)
+    console.log(recipeData.image)
+
     await saveRecipe(recipeData)
 }
 
