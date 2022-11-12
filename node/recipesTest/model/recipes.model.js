@@ -6,15 +6,15 @@ const DEAULT_ID = 0
 const options = {
   method: 'GET',
   url: 'https://tasty.p.rapidapi.com/recipes/list',
-  params: {from: '1', size: '9452'},
+  params: {from: '1', size: '9460'},
   headers: {
     'X-RapidAPI-Key': process.env.X_RapidAPI_Key,
     'X-RapidAPI-Host': process.env.X_RapidAPI_Host
   }
 };
 
-async function getRecipes(query){
-    return await recipes.find(query, {
+async function getRecipes(){
+    return await recipes.find({}, {
         _id: 0,
         __v: 0,
     })
@@ -72,9 +72,12 @@ async function hasEmbeddedRecipes(obj){
         }
 
         console.log(recipeData.name)
-        console.log(recipeData.image)
+        console.log(recipeData.instructions)
         
         await saveRecipe(recipeData)
+
+        instructions = []
+        ingredients = []
     }
 }
 
@@ -130,6 +133,11 @@ async function hasRecipes(obj){
 
 async function fetchRecipes(){
     const response = await axios.request(options)
+
+    if(response.status !== 200){
+        console.log(`Couldn't fetch recipes`)
+        throw new Error('Error connecting to API')
+    }
 
     const results = response.data.results
 

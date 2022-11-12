@@ -3,8 +3,8 @@ const { getRecipe } = require('../services/query')
 
 
 async function httpsGetRecipes(req, res){
-    const query = getRecipe(req.query)
-    const recipes = await getRecipes(query)
+    // const query = getRecipe(req.query)
+    const recipes = await getRecipes()
     
     return res.status(200).json(recipes)
 }
