@@ -1,4 +1,5 @@
-const http = require('http')
+const fs = require('fs')
+const https = require('https')
 
 require('dotenv').config()
 
@@ -9,7 +10,12 @@ const { fetchRecipes } = require('./model/recipes.model')
 
 const PORT = process.env.PORT
 
-const server = http.createServer(app)
+const options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+};
+
+const server = https.createServer(options, app)
 
 async function startServer(){
     await connectMongo() 
