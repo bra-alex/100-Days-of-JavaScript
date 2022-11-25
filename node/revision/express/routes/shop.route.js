@@ -9,7 +9,7 @@ const shopRouter = express.Router()
 
 shopRouter.get('/', (req, res) => {
     res.render('shop', {
-        docTitle: 'Shop',
+        pageTitle: 'Shop',
         products: products,
         hasProducts: products.length > 0,
         activeShop: true,
