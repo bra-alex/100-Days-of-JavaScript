@@ -10,9 +10,6 @@ const products = []
 adminRouter.get('/add-product', (req, res) => {
     res.render('add-product', {
         pageTitle: 'Add Product',
-        activeAddProduct: true,
-        productCSS: true,
-        formCSS: true,
         path: '/admin/add-product'
     })
 })

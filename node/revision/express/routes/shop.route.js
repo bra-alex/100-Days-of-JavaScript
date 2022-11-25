@@ -11,9 +11,6 @@ shopRouter.get('/', (req, res) => {
     res.render('shop', {
         pageTitle: 'Shop',
         products: products,
-        hasProducts: products.length > 0,
-        activeShop: true,
-        productCSS: true,
         path: '/'
     })
     // console.log(products );
