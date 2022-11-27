@@ -117,7 +117,7 @@ async function saveLaunch(launchData){
 }
 
 async function addNewLaunch(launch){
-    const planet = await planets.findOne({keplerName: launchData.target})
+    const planet = await planets.findOne({keplerName: launch.target})
 
     if(!planet){
         throw new Error('No matches found')
