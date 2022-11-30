@@ -12,4 +12,7 @@ shopRouter.get('/cart', shopController.getCart)
 shopRouter.get('/orders', shopController.getOrders)
 shopRouter.get('/checkout', shopController.getCheckout)
 
+shopRouter.post('/cart', shopController.postCart)
+shopRouter.post('/cart-delete-item', shopController.postCartDeleteItem)
+
 module.exports = shopRouter

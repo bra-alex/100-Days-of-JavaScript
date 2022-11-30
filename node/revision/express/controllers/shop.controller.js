@@ -1,4 +1,5 @@
 const Product = require('../models/product.model')
+const Cart = require('../models/cart.model')
 
 function getIndex(req, res) {
     Product.fetchAll(products => {
@@ -23,7 +24,6 @@ function getProducts(req, res) {
 function getProduct(req, res) {
     const productId = req.params.productId
     Product.findByID(productId, product => {
-        console.log(product)
         res.render('shop/product-detail', {
             pageTitle: product.name,
             product: product,
@@ -33,10 +33,40 @@ function getProduct(req, res) {
 }
 
 function getCart(req, res) {
-    res.render('shop/cart', {
-        pageTitle: 'Cart',
-        path: '/cart'
+    Cart.fetchCart(cart => {
+        Product.fetchAll(products => {
+            const cartProducts = []
+            for (const product of products) {
+                const cartData = cart.products.find(prod => prod.id === product.id)
+                if(cartData){
+                    cartProducts.push({productData: product, qty: cartData.qty})
+                }
+            }
+            res.render('shop/cart', {
+                pageTitle: 'Cart',
+                products: cartProducts,
+                totalPrice: cart.totalPrice,
+                path: '/cart'
+            })
+        })
     })
+}
+
+function postCart(req, res){
+    const productId = req.body.productId
+    Product.findByID(productId, product => {
+        Cart.addProduct(productId, product.price)
+    })
+    res.redirect('/cart')
+    
+}
+
+function postCartDeleteItem(req, res){
+    const productId = req.body.productId
+    Product.findByID(productId, product => {
+        Cart.deleteProduct(productId, product.price)
+    })
+    res.redirect('/cart')
 }
 
 function getOrders(req, res) {
@@ -58,6 +88,8 @@ module.exports = {
     getProducts,
     getProduct,
     getCart,
+    postCart,
+    postCartDeleteItem,
     getOrders,
     getCheckout
 }
