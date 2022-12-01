@@ -8,6 +8,8 @@ const adminRouter = require('./routes/admin.route')
 
 const errorController = require('./controllers/error.controller')
 
+const mysql = require('./util/mysql')
+
 const app = express()
 
 app.set('view engine', 'ejs')

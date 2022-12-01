@@ -18,7 +18,7 @@ function getProducts(req, res) {
     })
 }
 
-function postAddProduct(req, res) {
+async function postAddProduct(req, res) {
     const name = req.body.name
     const imageURL = req.body.imageURL
     const price = req.body.price
@@ -26,8 +26,11 @@ function postAddProduct(req, res) {
     
     const product = new Product(null, name, imageURL, price, description)
      
-    product.save()
-    res.redirect('/')
+    const saveSuccessful = product.save()
+
+    if (saveSuccessful) {
+        return res.redirect('/')
+    }
 }
 
 function getEditProduct(req, res) {
