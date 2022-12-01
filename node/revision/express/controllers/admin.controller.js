@@ -1,3 +1,4 @@
+const { where } = require('sequelize');
 const Product = require('../models/product.model')
 
 function getAddProduct(req, res) {
@@ -8,14 +9,17 @@ function getAddProduct(req, res) {
     })
 }
 
-function getProducts(req, res) {
-    Product.fetchAll(products => {
+async function getProducts(req, res) {
+    try {
+        const products = await Product.findAll()
         res.render('admin/products', {
             pageTitle: 'Products',
             products: products,
             path: '/admin/products'
         })
-    })
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 async function postAddProduct(req, res) {
@@ -24,16 +28,23 @@ async function postAddProduct(req, res) {
     const price = req.body.price
     const description = req.body.description
     
-    const product = new Product(null, name, imageURL, price, description)
-     
-    const saveSuccessful = product.save()
-
-    if (saveSuccessful) {
-        return res.redirect('/')
+    try {
+        await Product.create({
+            name: name,
+            imageURL: imageURL,
+            price: price,
+            description: description
+        })
+        
+        console.log('Created');
+        
+        res.redirect('/')
+    } catch (e) {
+        console.log(e);
     }
 }
 
-function getEditProduct(req, res) {
+async function getEditProduct(req, res) {
     const editMode = req.query.edit
 
     if(!editMode){
@@ -42,38 +53,62 @@ function getEditProduct(req, res) {
 
     const productId = req.params.productId
 
-    Product.findByID(productId, product => {
-        if(!product){
-            return res.redirect('/')
-        }
-        res.render('admin/edit-product', {
-            pageTitle: 'Edit Product',
-            path: '/admin/edit-product',
-            editing: editMode,
-            product: product
-        })
+    const product = await Product.findByPk(productId)
+
+    if(!product){
+        return res.redirect('/')
+    }
+
+    res.render('admin/edit-product', {
+        pageTitle: 'Edit Product',
+        path: '/admin/edit-product',
+        editing: editMode,
+        product: product
     })
 
 }
 
-function postEditProduct(req, res) {
+async function postEditProduct(req, res) {
     const id = req.body.productId
     const name = req.body.name
     const imageURL = req.body.imageURL
     const price = req.body.price
     const description = req.body.description
+
+    try {
+        await Product.update({
+            name: name,
+            imageURL: imageURL,
+            price: price,
+            description: description
+        }, {
+            where: {
+                id: id
+            }
+        })
+        res.redirect('/admin/products')
+
+    } catch (e) {
+        console.log(e);
+    }
     
-    const product = new Product(id, name, imageURL, price, description)
-     
-    product.save()
-    res.redirect('/admin/products')
 }
 
-function postDeleteProduct(req, res) {
+async function postDeleteProduct(req, res) {
     const id = req.body.productId
-    Product.delete(id)
 
-    res.redirect('/admin/products')
+    try {
+        await Product.destroy({
+            where:{
+                id: id
+            }
+        })
+    
+        res.redirect('/admin/products')
+    } catch (e) {
+        console.log(e);
+    }
+    
 }
 
 module.exports = {

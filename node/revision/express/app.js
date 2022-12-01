@@ -8,7 +8,7 @@ const adminRouter = require('./routes/admin.route')
 
 const errorController = require('./controllers/error.controller')
 
-const mysql = require('./util/mysql')
+const sequelize = require('./util/database')
 
 const app = express()
 
@@ -23,4 +23,13 @@ app.use('/admin',adminRouter)
 
 app.use(errorController.get404)
 
-app.listen(3000) 
+async function startServer(){
+    try {
+        await sequelize.sync()
+        app.listen(3000) 
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+startServer()
