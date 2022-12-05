@@ -48,12 +48,12 @@ async function startServer() {
         Cart.belongsToMany(Product, {through: CartItem})
         Product.belongsToMany(Cart, {through: CartItem})
 
-        Order.belongsTo(Order)
+        Order.belongsTo(User)
         User.hasMany(Order)
         Order.belongsToMany(Product, {through: OrderItem})
 
-        await sequelize.sync({force: true})
-        // await sequelize.sync()
+        // await sequelize.sync({force: true})
+        await sequelize.sync()
 
         let user = await User.findByPk(1)
         if (!user) {

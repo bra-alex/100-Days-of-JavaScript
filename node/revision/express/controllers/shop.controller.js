@@ -1,5 +1,4 @@
 const Product = require('../models/product.model')
-const Cart = require('../models/cart.model')
 
 async function getIndex(req, res) {
     try {
@@ -45,11 +44,11 @@ async function getProduct(req, res) {
             product: product,
             path: '/products'
         })
-        
+
     } catch (e) {
         console.log(e);
     }
-    
+
 }
 
 async function getCart(req, res) {
@@ -86,7 +85,7 @@ async function postCart(req, res) {
     try {
         const cart = await req.user.getCart()
         const products = await cart.getProducts({
-            where: {id: productId}
+            where: { id: productId }
         })
 
         let product;
@@ -97,10 +96,10 @@ async function postCart(req, res) {
 
         let qty = 1
 
-        if(!product){
+        if (!product) {
             const product = await Product.findByPk(productId)
             cart.addProduct(product, {
-                through: {qty: qty}
+                through: { qty: qty }
             })
             return res.redirect('/cart')
         }
@@ -109,7 +108,7 @@ async function postCart(req, res) {
         qty = oldQty + 1
 
         cart.addProduct(product, {
-            through: {qty: qty}
+            through: { qty: qty }
         })
 
         return res.redirect('/cart')
@@ -131,13 +130,13 @@ async function postCartDeleteItem(req, res) {
 
     const cart = await req.user.getCart()
     const products = await cart.getProducts({
-        where: {id: productId}
+        where: { id: productId }
     })
 
     const product = products[0]
 
     await product.cartItem.destroy()
-    
+
     res.redirect('/cart')
 
     /*
@@ -149,11 +148,39 @@ async function postCartDeleteItem(req, res) {
     */
 }
 
-function getOrders(req, res) {
-    res.render('shop/orders', {
-        pageTitle: 'Orders',
-        path: '/orders'
-    })
+async function postOrder(req, res) {
+    const productId = req.body.productId
+    try {
+
+        const cart = await req.user.getCart()
+        const products = await cart.getProducts()
+        const order = await req.user.createOrder()
+        await order.addProducts(products.map(product => {
+            product.orderItem = { qty: product.cartItem.qty }
+            return product
+        }))
+        await cart.setProducts(null)
+
+        res.redirect('/orders')
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function getOrders(req, res) {
+    try {
+        const orders = await req.user.getOrders({
+            include: ['products']
+        })
+        res.render('shop/orders', {
+            pageTitle: 'Orders',
+            orders: orders,
+            path: '/orders'
+        })
+    } catch (e) {
+        console.log(e);
+    }
+
 }
 
 function getCheckout(req, res) {
@@ -170,6 +197,7 @@ module.exports = {
     getCart,
     postCart,
     postCartDeleteItem,
+    postOrder,
     getOrders,
     getCheckout
 }

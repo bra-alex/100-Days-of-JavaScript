@@ -14,5 +14,6 @@ shopRouter.get('/checkout', shopController.getCheckout)
 
 shopRouter.post('/cart', shopController.postCart)
 shopRouter.post('/cart-delete-item', shopController.postCartDeleteItem)
+shopRouter.post('/create-order', shopController.postOrder)
 
 module.exports = shopRouter
