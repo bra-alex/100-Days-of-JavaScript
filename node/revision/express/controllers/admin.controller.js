@@ -11,7 +11,7 @@ function getAddProduct(req, res) {
 
 async function getProducts(req, res) {
     try {
-        const products = await Product.findAll()
+        const products = await req.user.getProducts()
         res.render('admin/products', {
             pageTitle: 'Products',
             products: products,
@@ -29,7 +29,7 @@ async function postAddProduct(req, res) {
     const description = req.body.description
     
     try {
-        await Product.create({
+        await req.user.createProduct({
             name: name,
             imageURL: imageURL,
             price: price,
@@ -38,7 +38,7 @@ async function postAddProduct(req, res) {
         
         console.log('Created');
         
-        res.redirect('/')
+        res.redirect('/admin/products')
     } catch (e) {
         console.log(e);
     }
@@ -53,7 +53,8 @@ async function getEditProduct(req, res) {
 
     const productId = req.params.productId
 
-    const product = await Product.findByPk(productId)
+    const products = await req.user.getProducts({where: {id: productId}})
+    const product = products[0]
 
     if(!product){
         return res.redirect('/')

@@ -52,7 +52,21 @@ async function getProduct(req, res) {
     
 }
 
-function getCart(req, res) {
+async function getCart(req, res) {
+    try {
+        const cart = await req.user.getCart()
+        const products = await cart.getProducts()
+        res.render('shop/cart', {
+            pageTitle: 'Cart',
+            products: products,
+            // totalPrice: cart.totalPrice,
+            path: '/cart'
+        })
+    } catch (e) {
+        console.log(e);
+    }
+
+    /*
     Cart.fetchCart(cart => {
         Product.fetchAll(products => {
             const cartProducts = []
@@ -62,31 +76,77 @@ function getCart(req, res) {
                     cartProducts.push({ productData: product, qty: cartData.qty })
                 }
             }
-            res.render('shop/cart', {
-                pageTitle: 'Cart',
-                products: cartProducts,
-                totalPrice: cart.totalPrice,
-                path: '/cart'
-            })
         })
     })
+    */
 }
 
-function postCart(req, res) {
+async function postCart(req, res) {
+    const productId = req.body.productId
+    try {
+        const cart = await req.user.getCart()
+        const products = await cart.getProducts({
+            where: {id: productId}
+        })
+
+        let product;
+
+        if (products.length > 0) {
+            product = products[0]
+        }
+
+        let qty = 1
+
+        if(!product){
+            const product = await Product.findByPk(productId)
+            cart.addProduct(product, {
+                through: {qty: qty}
+            })
+            return res.redirect('/cart')
+        }
+
+        const oldQty = product.cartItem.qty
+        qty = oldQty + 1
+
+        cart.addProduct(product, {
+            through: {qty: qty}
+        })
+
+        return res.redirect('/cart')
+    } catch (e) {
+        console.log(e);
+    }
+
+    /*
     const productId = req.body.productId
     Product.findByID(productId, product => {
         Cart.addProduct(productId, product.price)
     })
     res.redirect('/cart')
-
+    */
 }
 
-function postCartDeleteItem(req, res) {
+async function postCartDeleteItem(req, res) {
+    const productId = req.body.productId
+
+    const cart = await req.user.getCart()
+    const products = await cart.getProducts({
+        where: {id: productId}
+    })
+
+    const product = products[0]
+
+    await product.cartItem.destroy()
+    
+    res.redirect('/cart')
+
+    /*
     const productId = req.body.productId
     Product.findByID(productId, product => {
         Cart.deleteProduct(productId, product.price)
     })
     res.redirect('/cart')
+    */
 }
 
 function getOrders(req, res) {
