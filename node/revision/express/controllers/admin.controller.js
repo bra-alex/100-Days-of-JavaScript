@@ -22,15 +22,12 @@ async function postAddProduct(req, res) {
     const imageURL = req.body.imageURL
     const price = req.body.price
     const description = req.body.description
+    const userID = req.user._id
 
-    try {
-        const product = new Product(name, imageURL, price, description)
-        await product.save()
-        console.log('Saved');
-        res.redirect('/admin/products')
-    } catch (e) {
-        console.log(e);
-    }
+    const product = new Product(name, imageURL, price, description, userID)
+    await product.save()
+    console.log('Saved');
+    res.redirect('/admin/products')
 }
 
 async function getEditProduct(req, res) {
@@ -63,8 +60,9 @@ async function postEditProduct(req, res) {
     const imageURL = req.body.imageURL
     const price = req.body.price
     const description = req.body.description
+    const userID = req.user._id
 
-    const product = new Product(name, imageURL, price, description)
+    const product = new Product(name, imageURL, price, description, userID)
 
     await product.update(id)
     res.redirect('/admin/products')
@@ -74,7 +72,7 @@ async function postDeleteProduct(req, res) {
     const id = req.body.productId
 
     await Product.delete(id)
-    
+
     res.redirect('/admin/products')
 
 }

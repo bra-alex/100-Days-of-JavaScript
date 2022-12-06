@@ -23,7 +23,7 @@ const getDb = () => {
         return _db
     }
 
-    throw 'No database found'
+    // throw 'No database found'
 }
 
 module.exports = {

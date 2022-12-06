@@ -39,18 +39,15 @@ async function getProduct(req, res) {
 }
 
 async function getCart(req, res) {
-    try {
-        const cart = await req.user.getCart()
-        const products = await cart.getProducts()
-        res.render('shop/cart', {
-            pageTitle: 'Cart',
-            products: products,
-            // totalPrice: cart.totalPrice,
-            path: '/cart'
-        })
-    } catch (e) {
-        console.log(e);
-    }
+
+    const cart = await req.user.getCart()
+
+    res.render('shop/cart', {
+        pageTitle: 'Cart',
+        cart: cart,
+        // totalPrice: cart.totalPrice,
+        path: '/cart'
+    })
 
     /*
     Cart.fetchCart(cart => {
@@ -69,104 +66,32 @@ async function getCart(req, res) {
 
 async function postCart(req, res) {
     const productId = req.body.productId
-    try {
-        const cart = await req.user.getCart()
-        const products = await cart.getProducts({
-            where: { id: productId }
-        })
-
-        let product;
-
-        if (products.length > 0) {
-            product = products[0]
-        }
-
-        let qty = 1
-
-        if (!product) {
-            const product = await Product.findByPk(productId)
-            cart.addProduct(product, {
-                through: { qty: qty }
-            })
-            return res.redirect('/cart')
-        }
-
-        const oldQty = product.cartItem.qty
-        qty = oldQty + 1
-
-        cart.addProduct(product, {
-            through: { qty: qty }
-        })
-
-        return res.redirect('/cart')
-    } catch (e) {
-        console.log(e);
-    }
-
-    /*
-    const productId = req.body.productId
-    Product.findByID(productId, product => {
-        Cart.addProduct(productId, product.price)
-    })
-    res.redirect('/cart')
-    */
+    const product = await Product.fetchProduct(productId)
+    await req.user.addToCart(product)
+    return res.redirect('/cart')
 }
 
 async function postCartDeleteItem(req, res) {
     const productId = req.body.productId
 
-    const cart = await req.user.getCart()
-    const products = await cart.getProducts({
-        where: { id: productId }
-    })
-
-    const product = products[0]
-
-    await product.cartItem.destroy()
+    await req.user.deleteItemFromCart(productId)
 
     res.redirect('/cart')
-
-    /*
-    const productId = req.body.productId
-    Product.findByID(productId, product => {
-        Cart.deleteProduct(productId, product.price)
-    })
-    res.redirect('/cart')
-    */
 }
 
 async function postOrder(req, res) {
-    const productId = req.body.productId
-    try {
+    await req.user.addOrder()
 
-        const cart = await req.user.getCart()
-        const products = await cart.getProducts()
-        const order = await req.user.createOrder()
-        await order.addProducts(products.map(product => {
-            product.orderItem = { qty: product.cartItem.qty }
-            return product
-        }))
-        await cart.setProducts(null)
-
-        res.redirect('/orders')
-    } catch (e) {
-        console.log(e);
-    }
+    res.redirect('/orders')
 }
 
 async function getOrders(req, res) {
-    try {
-        const orders = await req.user.getOrders({
-            include: ['products']
-        })
-        res.render('shop/orders', {
-            pageTitle: 'Orders',
-            orders: orders,
-            path: '/orders'
-        })
-    } catch (e) {
-        console.log(e);
-    }
+    const orders = await req.user.getOrders()
+    res.render('shop/orders', {
+        pageTitle: 'Orders',
+        orders: orders,
+        path: '/orders'
+    })
 
 }
 
