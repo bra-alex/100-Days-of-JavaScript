@@ -1,75 +1,63 @@
-const Sequelize = require('sequelize')
-const sequelize = require('../util/database')
+const mongodb = require('mongodb')
+const {getDb} = require('../util/database')
 
-const Product = sequelize.define('product', {
-    id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        allowNull: false,
-        primaryKey: true
-    },
-    name: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    price: {
-        type: Sequelize.DOUBLE,
-        allowNull: false
-    },
-    imageURL: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    description: {
-        type: Sequelize.STRING,
-        allowNull: false
-    }
-})
-
-module.exports = Product
-
-//old model
-/*
-const db = require('../util/database')
-const Cart = require('../models/cart.model')
-
-
-module.exports = class Product {
-    constructor(id, name, imageURL, price, description){
-        this.id = id
+class Product {
+    constructor(name, imageURL, price, description){
         this.name = name
         this.imageURL = imageURL
         this.description = description
         this.price = price
     }
 
-    async save(){
-        // mysql2 syntax
-        /*
-        return await db.execute(
-            'INSERT INTO products (name, price, imageURL, description) VALUES (?, ?, ?, ?)',
-            [this.name, this.price, this.imageURL, this.description]
-        )
-        
-    }
-
-    static delete(id){
-        
-    }
-
     static async fetchAll(){
-        // mysql2 syntax
-        /*
-        return await db.execute('SELECT * FROM products')
-        
+        const db = getDb().collection('products')
+        try {
+            return await db.find().toArray()
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    static async findByID(id){
-        // mysql2 syntax
-        /*
-        return await db.execute('SELECT * FROM products WHERE products.id = ?', [id])
-        
+    static async fetchProduct(id){
+        const db = getDb().collection('products')
+        try {
+            return await db.findOne({_id: new mongodb.ObjectId(id)})
+        } catch (e) {
+            console.log(e);
+        }
     }
-    
+
+    async save(){
+        const db = getDb().collection('products')
+        try {
+            await db.insertOne(this)
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    async update(id){
+        const db = getDb().collection('products')
+
+        try {
+            await db.updateOne(
+                {_id: new mongodb.ObjectId(id)},
+                {$set: this},
+            )
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    static async delete(id){
+        const db = getDb().collection('products')
+
+        try {
+            await db.deleteOne({_id: new mongodb.ObjectId(id)})
+        } catch (e) {
+            console.log(e);
+        }
+    }
 }
-*/
+
+module.exports = Product

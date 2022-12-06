@@ -7,14 +7,7 @@ const shopRouter = require('./routes/shop.route')
 const adminRouter = require('./routes/admin.route')
 
 const errorController = require('./controllers/error.controller')
-
-const sequelize = require('./util/database')
-const Product = require('./models/product.model')
-const User = require('./models/user.model')
-const Cart = require('./models/cart.model')
-const CartItem = require('./models/cartItem.model')
-const Order = require('./models/order.model')
-const OrderItem = require('./models/orderItem.model')
+const {mongoConnect} = require('./util/database')
 
 const app = express()
 
@@ -24,7 +17,11 @@ app.set('views', 'views')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.static(path.join(rootDir, 'public')))
 
-app.use(async (req, res, next) => {
+// app.use(async (req, res, next) => {
+
+
+    // Sequelize
+    /*
     try {
         const user = await User.findByPk(1)
         req.user = user
@@ -32,7 +29,8 @@ app.use(async (req, res, next) => {
     } catch (e) {
         console.log(e);
     }
-})
+    */
+// })
 
 app.use(shopRouter)
 app.use('/admin', adminRouter)
@@ -40,6 +38,11 @@ app.use('/admin', adminRouter)
 app.use(errorController.get404)
 
 async function startServer() {
+    await mongoConnect()
+    app.listen(3000)
+
+    // Sequelize
+    /*
     try {
         Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' })
         User.hasMany(Product)
@@ -75,6 +78,7 @@ async function startServer() {
     } catch (e) {
         console.log(e);
     }
+    */
 }
 
 startServer()

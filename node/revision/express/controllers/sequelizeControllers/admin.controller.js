@@ -1,3 +1,4 @@
+const { where } = require('sequelize');
 const Product = require('../models/product.model')
 
 function getAddProduct(req, res) {
@@ -9,12 +10,16 @@ function getAddProduct(req, res) {
 }
 
 async function getProducts(req, res) {
-    const products = await Product.fetchAll()
-    res.render('admin/products', {
-        pageTitle: 'Products',
-        products: products,
-        path: '/admin/products'
-    })
+    try {
+        const products = await req.user.getProducts()
+        res.render('admin/products', {
+            pageTitle: 'Products',
+            products: products,
+            path: '/admin/products'
+        })
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 async function postAddProduct(req, res) {
@@ -22,11 +27,17 @@ async function postAddProduct(req, res) {
     const imageURL = req.body.imageURL
     const price = req.body.price
     const description = req.body.description
-
+    
     try {
-        const product = new Product(name, imageURL, price, description)
-        await product.save()
-        console.log('Saved');
+        await req.user.createProduct({
+            name: name,
+            imageURL: imageURL,
+            price: price,
+            description: description
+        })
+        
+        console.log('Created');
+        
         res.redirect('/admin/products')
     } catch (e) {
         console.log(e);
@@ -36,15 +47,16 @@ async function postAddProduct(req, res) {
 async function getEditProduct(req, res) {
     const editMode = req.query.edit
 
-    if (!editMode) {
+    if(!editMode){
         return res.redirect('/')
     }
 
     const productId = req.params.productId
 
-    const product = await Product.fetchProduct(productId)
+    const products = await req.user.getProducts({where: {id: productId}})
+    const product = products[0]
 
-    if (!product) {
+    if(!product){
         return res.redirect('/')
     }
 
@@ -64,19 +76,40 @@ async function postEditProduct(req, res) {
     const price = req.body.price
     const description = req.body.description
 
-    const product = new Product(name, imageURL, price, description)
+    try {
+        await Product.update({
+            name: name,
+            imageURL: imageURL,
+            price: price,
+            description: description
+        }, {
+            where: {
+                id: id
+            }
+        })
+        res.redirect('/admin/products')
 
-    await product.update(id)
-    res.redirect('/admin/products')
+    } catch (e) {
+        console.log(e);
+    }
+    
 }
 
 async function postDeleteProduct(req, res) {
     const id = req.body.productId
 
-    await Product.delete(id)
+    try {
+        await Product.destroy({
+            where:{
+                id: id
+            }
+        })
     
-    res.redirect('/admin/products')
-
+        res.redirect('/admin/products')
+    } catch (e) {
+        console.log(e);
+    }
+    
 }
 
 module.exports = {
