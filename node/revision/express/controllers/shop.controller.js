@@ -1,4 +1,5 @@
 const Product = require('../models/product.model')
+const Order = require('../models/order.model')
 
 async function getIndex(req, res) {
     try {
@@ -43,8 +44,8 @@ async function getProduct(req, res) {
 }
 
 async function getCart(req, res) {
-
-    const cart = await req.user.getCart()
+    const user = await req.user.populate('cart.items.productId', 'name')
+    const cart = user.cart.items
 
     res.render('shop/cart', {
         pageTitle: 'Cart',
@@ -70,7 +71,7 @@ async function getCart(req, res) {
 
 async function postCart(req, res) {
     const productId = req.body.productId
-    const product = await Product.fetchProduct(productId)
+    const product = await Product.findById(productId)
     await req.user.addToCart(product)
     return res.redirect('/cart')
 }
@@ -78,25 +79,48 @@ async function postCart(req, res) {
 async function postCartDeleteItem(req, res) {
     const productId = req.body.productId
 
-    await req.user.deleteItemFromCart(productId)
+    await req.user.removeFromCart(productId)
 
     res.redirect('/cart')
 }
 
 async function postOrder(req, res) {
-    await req.user.addOrder()
+    try {
+        const user = await req.user.populate('cart.items.productId')
+        const productDetails = user.cart.items.map(p => {
+            return { quantity: p.quantity, productData: {...p.productId._doc} }
+        })
 
-    res.redirect('/orders')
+        const order = new Order({
+            user: {
+                userId: req.user._id,
+                username: req.user.username
+            },
+            products: productDetails
+        })
+
+        await order.save()
+        await req.user.clearCart()
+
+        console.log("Order Added");
+
+        res.redirect('/orders')
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 async function getOrders(req, res) {
-    const orders = await req.user.getOrders()
-    res.render('shop/orders', {
-        pageTitle: 'Orders',
-        orders: orders,
-        path: '/orders'
-    })
-
+    try {
+        const orders = await Order.find({'user.userId': req.user._id})
+        res.render('shop/orders', {
+            pageTitle: 'Orders',
+            orders: orders,
+            path: '/orders'
+        })
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 function getCheckout(req, res) {

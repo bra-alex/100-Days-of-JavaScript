@@ -5,14 +5,8 @@ require('dotenv').config()
 const MONGO_URL = process.env.MONGO_URL
 
 async function mongoConnect() {
-    try {
-
-        await mongoose.connect(MONGO_URL)
-
-        console.log('Connected');
-    } catch (e) {
-        console.log(e);
-    }
+    await mongoose.connect(MONGO_URL)
+    console.log('Connected');
 }
 
 module.exports = {

@@ -27,13 +27,14 @@ async function postAddProduct(req, res) {
         const imageURL = req.body.imageURL
         const price = req.body.price
         const description = req.body.description
-        // const userID = req.user._id
+        const userID = req.user._id
 
         const product = new Product({
             name: name,
             imageURL: imageURL,
             price: price,
             description: description,
+            userID: userID
         })
         await product.save()
         console.log('Saved');
@@ -78,14 +79,14 @@ async function postEditProduct(req, res) {
         const imageURL = req.body.imageURL
         const price = req.body.price
         const description = req.body.description
-        // const userID = req.user._id
+        const userID = req.user._id
 
         const product = {
             name,
             imageURL,
             description,
             price,
-            // userID
+            userID
         }
 
         await Product.findByIdAndUpdate(id, product)
