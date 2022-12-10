@@ -1,5 +1,6 @@
 const path = require('path')
 const express = require('express')
+const Product = require('../models/product.model')
 
 const shopController = require('../controllers/shop.controller')
 

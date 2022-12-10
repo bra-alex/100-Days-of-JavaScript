@@ -1,45 +1,41 @@
 const Product = require('../models/product.model')
 
 async function getIndex(req, res) {
-    try {
-        const products = await Product.find()
-        res.render('shop/index', {
-            pageTitle: 'Shop',
-            products: products,
-            path: '/'
-        })
-    } catch (e) {
-        console.log(e);
-    }
-
+    const products = await Product.fetchAll()
+    res.render('shop/index', {
+        pageTitle: 'Shop',
+        products: products,
+        path: '/'
+    })
 }
 
 async function getProducts(req, res) {
-    try {
-        const products = await Product.find()
-        res.render('shop/product-list', {
-            pageTitle: 'Products',
-            products: products,
-            path: '/products'
-        })
-    } catch (e) {
-        console.log(e);
-    }
+    const products = await Product.fetchAll()
+    res.render('shop/product-list', {
+        pageTitle: 'Products',
+        products: products,
+        path: '/products'
+    })
+
 }
 
 async function getProduct(req, res) {
-    try {
-        const productId = req.params.productId
+    const productId = req.params.productId
+    /*
+    const product = await Product.findAll({
+        where: {
+            id: productId
+        }
+    })
+    */
 
-        const product = await Product.findById(productId)
-        res.render('shop/product-detail', {
-            pageTitle: product.name,
-            product: product,
-            path: '/products'
-        })
-    } catch (e) {
-        console.log(e);
-    }
+    const product = await Product.fetchProduct(productId)
+    res.render('shop/product-detail', {
+        pageTitle: product.name,
+        product: product,
+        path: '/products'
+    })
+
 }
 
 async function getCart(req, res) {

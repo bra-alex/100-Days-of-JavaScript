@@ -18,22 +18,22 @@ app.set('views', 'views')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.static(path.join(rootDir, 'public')))
 
-app.use(async (req, res, next) => {
-    const user = await User.findUser('638f71b9bbb4483f5123f772')
-    req.user = new User(user.username, user.email, user.cart, user._id)
-    next()
+// app.use(async (req, res, next) => {
+//     // const user = await User.findUser('638f71b9bbb4483f5123f772')
+//     // req.user = new User(user.username, user.email, user.cart, user._id)
+//     next()
 
-    // Sequelize
-    /*
-    try {
-        const user = await User.findByPk(1)
-        req.user = user
-        next()
-    } catch (e) {
-        console.log(e);
-    }
-    */
-})
+//     // Sequelize
+//     /*
+//     try {
+//         const user = await User.findByPk(1)
+//         req.user = user
+//         next()
+//     } catch (e) {
+//         console.log(e);
+//     }
+//     */
+// })
 
 app.use(shopRouter)
 app.use('/admin', adminRouter)
@@ -42,12 +42,12 @@ app.use(errorController.get404)
 
 async function startServer() {
     await mongoConnect()
-    const user = await User.findUser('638f71b9bbb4483f5123f772')
+    // const user = await User.findUser('638f71b9bbb4483f5123f772')
 
-    if(!user){
-        const user = new User('braalex', 'test@test.com')
-        await user.save()
-    }
+    // if(!user){
+    //     const user = new User('braalex', 'test@test.com')
+    //     await user.save()
+    // }
 
     app.listen(3000)
 
