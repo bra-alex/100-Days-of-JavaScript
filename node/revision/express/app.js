@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const rootDir = require('./util/path')
 const shopRouter = require('./routes/shop.route')
 const adminRouter = require('./routes/admin.route')
+const authRouter = require('./routes/auth.route')
 
 const { mongoConnect } = require('./util/database')
 const errorController = require('./controllers/error.controller')
@@ -40,6 +41,7 @@ app.use(async (req, res, next) => {
 })
 
 app.use(shopRouter)
+app.use(authRouter)
 app.use('/admin', adminRouter)
 
 app.use(errorController.get404)

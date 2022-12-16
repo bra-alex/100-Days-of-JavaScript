@@ -2,12 +2,13 @@ const Product = require('../models/product.model')
 const Order = require('../models/order.model')
 
 async function getIndex(req, res) {
-    try {
+    try { 
         const products = await Product.find()
         res.render('shop/index', {
             pageTitle: 'Shop',
             products: products,
-            path: '/'
+            path: '/',
+            isLoggedIn: req.isLoggedIn
         })
     } catch (e) {
         console.log(e);
@@ -21,7 +22,8 @@ async function getProducts(req, res) {
         res.render('shop/product-list', {
             pageTitle: 'Products',
             products: products,
-            path: '/products'
+            path: '/products',
+            isLoggedIn: req.isLoggedIn
         })
     } catch (e) {
         console.log(e);
@@ -36,7 +38,8 @@ async function getProduct(req, res) {
         res.render('shop/product-detail', {
             pageTitle: product.name,
             product: product,
-            path: '/products'
+            path: '/products',
+            isLoggedIn: req.isLoggedIn
         })
     } catch (e) {
         console.log(e);
@@ -51,22 +54,9 @@ async function getCart(req, res) {
         pageTitle: 'Cart',
         cart: cart,
         // totalPrice: cart.totalPrice,
-        path: '/cart'
+        path: '/cart',
+        isLoggedIn: req.isLoggedIn
     })
-
-    /*
-    Cart.fetchCart(cart => {
-        Product.fetchAll(products => {
-            const cartProducts = []
-            for (const product of products) {
-                const cartData = cart.products.find(prod => prod.id === product.id)
-                if (cartData) {
-                    cartProducts.push({ productData: product, qty: cartData.qty })
-                }
-            }
-        })
-    })
-    */
 }
 
 async function postCart(req, res) {
@@ -116,7 +106,8 @@ async function getOrders(req, res) {
         res.render('shop/orders', {
             pageTitle: 'Orders',
             orders: orders,
-            path: '/orders'
+            path: '/orders',
+            isLoggedIn: req.isLoggedIn
         })
     } catch (e) {
         console.log(e);
@@ -126,7 +117,8 @@ async function getOrders(req, res) {
 function getCheckout(req, res) {
     res.render('shop/checkout', {
         pageTitle: 'Checkout',
-        path: '/checkout'
+        path: '/checkout',
+        isLoggedIn: req.isLoggedIn
     })
 }
 

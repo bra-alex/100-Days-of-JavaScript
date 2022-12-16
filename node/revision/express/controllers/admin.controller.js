@@ -4,7 +4,8 @@ function getAddProduct(req, res) {
     res.render('admin/edit-product', {
         pageTitle: 'Add Product',
         path: '/admin/add-product',
-        editing: false
+        editing: false,
+        isLoggedIn: req.isLoggedIn
     })
 }
 
@@ -14,7 +15,8 @@ async function getProducts(req, res) {
         res.render('admin/products', {
             pageTitle: 'Products',
             products: products,
-            path: '/admin/products'
+            path: '/admin/products',
+            isLoggedIn: req.isLoggedIn
         })
     } catch (e) {
         console.log(e);
@@ -65,7 +67,8 @@ async function getEditProduct(req, res) {
             pageTitle: 'Edit Product',
             path: '/admin/edit-product',
             editing: editMode,
-            product: product
+            product: product,
+            isLoggedIn: req.isLoggedIn
         })
     } catch (e) {
         console.log(e);
