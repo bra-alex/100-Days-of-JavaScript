@@ -1,23 +1,40 @@
+require('dotenv').config()
+
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
+const session = require('express-session')
+const MongoDBStore = require('connect-mongodb-session')(session)
 
 const rootDir = require('./util/path')
+const authRouter = require('./routes/auth.route')
 const shopRouter = require('./routes/shop.route')
 const adminRouter = require('./routes/admin.route')
-const authRouter = require('./routes/auth.route')
 
+const User = require('./models/user.model')
 const { mongoConnect } = require('./util/database')
 const errorController = require('./controllers/error.controller')
-const User = require('./models/user.model')
 
 const app = express()
+
+const secret = process.env.SESSION_SECRET
+const sessionStore = new MongoDBStore({
+    uri: process.env.MONGO_URL,
+    collection: 'sessions',
+})
 
 app.set('view engine', 'ejs')
 app.set('views', 'views')
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.static(path.join(rootDir, 'public')))
+
+app.use(session({
+    secret: secret,
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore
+}))
 
 app.use(async (req, res, next) => {
     try {

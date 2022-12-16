@@ -7,7 +7,7 @@ function getLogin(req, res){
 }
 
 function postLogin(req, res){
-    res.setHeader('Set-Cookie', 'loggedIn=true')
+    req.session.isLoggedIn = true
     res.redirect('/')
 }
 
