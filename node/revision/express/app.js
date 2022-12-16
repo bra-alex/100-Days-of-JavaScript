@@ -38,13 +38,12 @@ app.use(session({
 
 app.use(async (req, res, next) => {
     try {
-        const user = await User.findById('639491314ccf193e74c5746f')
+        const user = await User.findById(req.session.user._id)
         req.user = user
         next()
     } catch (e) {
         console.log(e);
     }
-
     // Sequelize
     /*
     try {

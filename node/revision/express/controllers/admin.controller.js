@@ -5,7 +5,7 @@ function getAddProduct(req, res) {
         pageTitle: 'Add Product',
         path: '/admin/add-product',
         editing: false,
-        isLoggedIn: req.isLoggedIn
+        isLoggedIn: req.session.isLoggedIn
     })
 }
 
@@ -16,7 +16,7 @@ async function getProducts(req, res) {
             pageTitle: 'Products',
             products: products,
             path: '/admin/products',
-            isLoggedIn: req.isLoggedIn
+            isLoggedIn: req.session.isLoggedIn
         })
     } catch (e) {
         console.log(e);
@@ -68,7 +68,7 @@ async function getEditProduct(req, res) {
             path: '/admin/edit-product',
             editing: editMode,
             product: product,
-            isLoggedIn: req.isLoggedIn
+            isLoggedIn: req.session.isLoggedIn
         })
     } catch (e) {
         console.log(e);
