@@ -37,10 +37,10 @@ app.use(session({
 }))
 
 app.use(async (req, res, next) => {
-    if (!req.session.user){
+    if (!req.session.user) {
         return next()
     }
-    
+
     try {
         const user = await User.findById(req.session.user._id)
         req.user = user
@@ -67,26 +67,10 @@ app.use('/admin', adminRouter)
 app.use(errorController.get404)
 
 async function startServer() {
-    try {
-        await mongoConnect()
-        const user = await User.findOne()
-
-        if (!user) {
-            const user = new User({
-                username: 'braalex',
-                email: 'test@test.com',
-                cart: {
-                    items: []
-                }
-            })
-            await user.save()
-            console.log('User created');
-        }
-
-        app.listen(3000)
-    } catch (e) {
-        console.log(e);
-    }
+     
+    await mongoConnect()
+    app.listen(3000)
+    
     // Sequelize
     /*
     try {

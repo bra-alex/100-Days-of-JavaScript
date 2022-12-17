@@ -1,22 +1,30 @@
 const User = require('../models/user.model')
 
-function getLogin(req, res){
+function getLogin(req, res) {
     res.render('auth/login', {
         pageTitle: 'Login',
         path: '/login',
-        isLoggedIn: req.session.isLoggedIn
+        isAuthenticated: req.session.isAuthenticated
     })
 }
 
-async function postLogin(req, res){
+function getSignUp(req, res) {
+    res.render('auth/signup', {
+        pageTitle: 'Sign Up',
+        path: '/signup',
+        isAuthenticated: req.session.isAuthenticated
+    })
+}
+
+async function postLogin(req, res) {
     try {
         const user = await User.findById('639491314ccf193e74c5746f')
 
         req.session.user = user
-        req.session.isLoggedIn = true
-        
+        req.session.isAuthenticated = true
+
         req.session.save((err) => {
-            if(err){
+            if (err) {
                 return console.error(err);
             }
             res.redirect('/')
@@ -27,9 +35,38 @@ async function postLogin(req, res){
     }
 }
 
-function postLogout(req, res){
+async function postSignUp(req, res) {
+    const username = req.body.username
+    const email = req.body.email
+    const password = req.body.password
+    const confirmPassword = req.body.confirmPassword
+
+    try {
+        const usernameExists = await User.findOne({ username: username })
+        const emailExists = await User.findOne({ email: email })
+
+        if (usernameExists || emailExists) {
+            return res.redirect('/signup')
+        }
+
+        const user = new User({
+            username: username,
+            email: email,
+            password: password,
+            cart: { items: [] }
+        })
+
+        await user.save()
+
+        res.redirect('/login')
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function postLogout(req, res) {
     req.session.destroy((err) => {
-        if(err){
+        if (err) {
             return console.error(err);
         }
         res.redirect('/')
@@ -38,6 +75,8 @@ function postLogout(req, res){
 
 module.exports = {
     getLogin,
+    getSignUp,
     postLogin,
+    postSignUp,
     postLogout
 }
