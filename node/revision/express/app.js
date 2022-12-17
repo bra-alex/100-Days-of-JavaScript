@@ -3,6 +3,7 @@ require('dotenv').config()
 const path = require('path')
 const csrf = require('csurf')
 const express = require('express')
+const flash = require('connect-flash')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const MongoDBStore = require('connect-mongodb-session')(session)
@@ -24,8 +25,6 @@ const sessionStore = new MongoDBStore({
     collection: 'sessions',
 })
 
-const csrfProtection = csrf()
-
 app.set('view engine', 'ejs')
 app.set('views', 'views')
 
@@ -39,7 +38,8 @@ app.use(session({
     store: sessionStore
 }))
 
-app.use(csrfProtection)
+app.use(csrf())
+app.use(flash())
 
 app.use(async (req, res, next) => {
     if (!req.session.user) {
