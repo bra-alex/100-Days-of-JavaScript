@@ -18,8 +18,25 @@ function getSignUp(req, res) {
 }
 
 async function postLogin(req, res) {
+    const email = req.body.email
+    const password = req.body.password
+
     try {
-        const user = await User.findById('639491314ccf193e74c5746f')
+        let user = await User.findOne({email: email})
+
+        if(!user){
+            user = await User.findOne({username: email})
+        }
+        
+        if(!user){
+            return res.redirect('/login')
+        }
+
+        const passwordEqual = await bcrypt.compare(password, user.password)
+
+        if(!passwordEqual){
+            return res.redirect('/login')
+        }
 
         req.session.user = user
         req.session.isAuthenticated = true
