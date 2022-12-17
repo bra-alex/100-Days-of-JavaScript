@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const path = require('path')
+const csrf = require('csurf')
 const express = require('express')
 const bodyParser = require('body-parser')
 const session = require('express-session')
@@ -23,6 +24,8 @@ const sessionStore = new MongoDBStore({
     collection: 'sessions',
 })
 
+const csrfProtection = csrf()
+
 app.set('view engine', 'ejs')
 app.set('views', 'views')
 
@@ -35,6 +38,8 @@ app.use(session({
     saveUninitialized: false,
     store: sessionStore
 }))
+
+app.use(csrfProtection)
 
 app.use(async (req, res, next) => {
     if (!req.session.user) {
@@ -58,6 +63,12 @@ app.use(async (req, res, next) => {
         console.log(e);
     }
     */
+})
+
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn
+    res.locals.csrfToken = req.csrfToken()
+    next()
 })
 
 app.use(shopRouter)

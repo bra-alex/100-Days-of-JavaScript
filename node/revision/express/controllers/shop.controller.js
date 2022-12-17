@@ -7,8 +7,7 @@ async function getIndex(req, res) {
         res.render('shop/index', {
             pageTitle: 'Shop',
             products: products,
-            path: '/',
-            isAuthenticated: req.session.isAuthenticated
+            path: '/'
         })
     } catch (e) {
         console.log(e);
@@ -22,8 +21,7 @@ async function getProducts(req, res) {
         res.render('shop/product-list', {
             pageTitle: 'Products',
             products: products,
-            path: '/products',
-            isAuthenticated: req.session.isAuthenticated
+            path: '/products'
         })
     } catch (e) {
         console.log(e);
@@ -38,8 +36,7 @@ async function getProduct(req, res) {
         res.render('shop/product-detail', {
             pageTitle: product.name,
             product: product,
-            path: '/products',
-            isAuthenticated: req.session.isAuthenticated
+            path: '/products'
         })
     } catch (e) {
         console.log(e);
@@ -54,8 +51,7 @@ async function getCart(req, res) {
         pageTitle: 'Cart',
         cart: cart,
         // totalPrice: cart.totalPrice,
-        path: '/cart',
-        isAuthenticated: req.session.isAuthenticated
+        path: '/cart'
     })
 }
 
@@ -107,7 +103,7 @@ async function getOrders(req, res) {
             pageTitle: 'Orders',
             orders: orders,
             path: '/orders',
-            isAuthenticated: req.session.isAuthenticated
+            
         })
     } catch (e) {
         console.log(e);
@@ -118,7 +114,7 @@ function getCheckout(req, res) {
     res.render('shop/checkout', {
         pageTitle: 'Checkout',
         path: '/checkout',
-        isAuthenticated: req.session.isAuthenticated
+        
     })
 }
 

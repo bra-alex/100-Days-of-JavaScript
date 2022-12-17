@@ -4,8 +4,7 @@ function getAddProduct(req, res) {
     res.render('admin/edit-product', {
         pageTitle: 'Add Product',
         path: '/admin/add-product',
-        editing: false,
-        isAuthenticated: req.session.isAuthenticated
+        editing: false
     })
 }
 
@@ -15,8 +14,7 @@ async function getProducts(req, res) {
         res.render('admin/products', {
             pageTitle: 'Products',
             products: products,
-            path: '/admin/products',
-            isAuthenticated: req.session.isAuthenticated
+            path: '/admin/products'
         })
     } catch (e) {
         console.log(e);
@@ -43,8 +41,7 @@ async function getEditProduct(req, res) {
             pageTitle: 'Edit Product',
             path: '/admin/edit-product',
             editing: editMode,
-            product: product,
-            isAuthenticated: req.session.isAuthenticated
+            product: product
         })
     } catch (e) {
         console.log(e);
@@ -115,8 +112,8 @@ async function postDeleteProduct(req, res) {
 module.exports = {
     getAddProduct,
     getProducts,
-    postAddProduct,
     getEditProduct,
+    postAddProduct,
     postEditProduct,
     postDeleteProduct
 }

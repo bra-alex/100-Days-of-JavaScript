@@ -4,16 +4,14 @@ const User = require('../models/user.model')
 function getLogin(req, res) {
     res.render('auth/login', {
         pageTitle: 'Login',
-        path: '/login',
-        isAuthenticated: req.session.isAuthenticated
+        path: '/login'
     })
 }
 
 function getSignUp(req, res) {
     res.render('auth/signup', {
         pageTitle: 'Sign Up',
-        path: '/signup',
-        isAuthenticated: req.session.isAuthenticated
+        path: '/signup'
     })
 }
 
@@ -39,7 +37,7 @@ async function postLogin(req, res) {
         }
 
         req.session.user = user
-        req.session.isAuthenticated = true
+        req.session.isLoggedIn = true
 
         req.session.save((err) => {
             if (err) {
