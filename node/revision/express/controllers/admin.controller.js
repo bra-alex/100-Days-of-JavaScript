@@ -10,7 +10,7 @@ function getAddProduct(req, res) {
 
 async function getProducts(req, res) {
     try {
-        const products = await Product.find()
+        const products = await Product.find({userID: req.user._id})
         res.render('admin/products', {
             pageTitle: 'Products',
             products: products,
@@ -34,6 +34,10 @@ async function getEditProduct(req, res) {
         const product = await Product.findById(productId)
 
         if (!product) {
+            return res.redirect('/')
+        }
+        
+        if(product.userID.toString() !== req.user._id.toString()){
             return res.redirect('/')
         }
 
@@ -81,7 +85,7 @@ async function postEditProduct(req, res) {
         const description = req.body.description
         const userID = req.user._id
 
-        const product = {
+        const editedProduct = {
             name,
             imageURL,
             description,
@@ -89,19 +93,24 @@ async function postEditProduct(req, res) {
             userID
         }
 
-        await Product.findByIdAndUpdate(id, product)
+        const product = await Product.findById(id)
+
+        if (product.userID.toString() !== userID.toString()){
+            return res.redirect('/')
+        }
+
+        await product.update(editedProduct)
         res.redirect('/admin/products')
     } catch (e) {
         console.log(e);
     }
-
 }
 
 async function postDeleteProduct(req, res) {
     try {
         const id = req.body.productId
 
-        await Product.deleteOne({ _id: id })
+        await Product.deleteOne({ _id: id, userID: req.user._id })
 
         res.redirect('/admin/products')
     } catch (e) {
