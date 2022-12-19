@@ -7,8 +7,8 @@ const nodemailer = require('nodemailer')
 const User = require('../models/user.model')
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.sendgrid.net',
-    port: 587,
+    host: process.env.SENDGRID_SMTP_HOST,
+    port: process.env.SENDGRID_SMTP_PORT,
     auth: {
         user: "apikey",
         pass: process.env.SENDGRID_API_KEY
