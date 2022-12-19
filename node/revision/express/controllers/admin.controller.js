@@ -99,7 +99,7 @@ async function postEditProduct(req, res) {
             return res.redirect('/')
         }
 
-        await product.update(editedProduct)
+        await Product.findByIdAndUpdate(id, editedProduct)
         res.redirect('/admin/products')
     } catch (e) {
         console.log(e);
