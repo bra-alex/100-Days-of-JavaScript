@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
         user: "apikey",
         pass: process.env.SENDGRID_API_KEY
     }
- })
+})
 
 function getLogin(req, res) {
     let message = req.flash('error')
@@ -58,6 +58,36 @@ function getReset(req, res) {
         path: '/reset',
         errorMessage: message
     })
+}
+
+async function getResetPassword(req, res) {
+    try {
+        const token = req.params.resetToken
+
+        const user = await User.findOne({ resetToken: token, resetTokenExpiry: { $gt: Date.now() } })
+
+        if (!user) {
+            return res.redirect('/error')
+        }
+
+        let message = req.flash('error')
+        if (message.length > 0) {
+            message = message[0]
+        } else {
+            message = null
+        }
+
+        res.render('auth/reset-password', {
+            pageTitle: 'Reset Password',
+            path: '/reset-password',
+            errorMessage: message,
+            token: token,
+            userId: user._id.toString()
+        })
+    } catch (e) {
+        console.log(e);
+    }
+
 }
 
 async function postLogin(req, res) {
@@ -206,12 +236,54 @@ function postReset(req, res) {
     })
 }
 
+async function postResetPassword(req, res) {
+    const userId = req.body.userId
+    const token = req.params.resetToken
+    const password = req.body.newPassword
+    const confirmPassword = req.body.confirmPassword
+
+    if (!password) {
+        req.flash('error', 'Please enter a password')
+        return res.redirect(`/reset/${token}`)
+    }
+
+    if (confirmPassword !== password) {
+        req.flash('error', 'Passwords do not match')
+        return res.redirect(`/reset/${token}`)
+    }
+
+    try {
+        const user = await User.findOne(
+            { 
+                resetToken: token, 
+                resetTokenExpiry: { $gt: Date.now() }, 
+                _id: userId 
+            })
+
+        const newPassword = await bcrypt.hash(password, 12)
+
+        user.password = newPassword
+        user.resetToken = undefined
+        user.resetTokenExpiry = undefined
+
+        await user.save()
+
+        console.log('Password Reset');
+
+        res.redirect('/login')
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 module.exports = {
     getLogin,
     getSignUp,
     getReset,
+    getResetPassword,
     postLogin,
     postSignUp,
     postLogout,
-    postReset
+    postReset,
+    postResetPassword
 }
