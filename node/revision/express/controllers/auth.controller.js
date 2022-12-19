@@ -64,7 +64,7 @@ async function getResetPassword(req, res) {
         res.render('auth/reset-password', {
             pageTitle: 'Reset Password',
             path: '/reset-password',
-            errorMessage: null,
+            errorMessage: req.session.errors,
             token: token,
             userId: user._id.toString()
         })
@@ -210,11 +210,6 @@ function postReset(req, res) {
         try {
             const user = await User.findOne({ email: req.body.email })
 
-            if (!user) {
-                req.flash('error', 'User not found.')
-                return res.redirect('/reset')
-            }
-
             user.resetToken = resetToken
             user.resetTokenExpiry = Date.now() + (60 * 60 * 1000)
             await user.save()
@@ -245,11 +240,13 @@ async function postResetPassword(req, res) {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).render(`auth/reset/${token}`, {
-            pageTitle: 'Reset Password',
-            path: '/reset',
-            errorMessage: errors.array()[0].msg
-        })
+        let messages = errors.array().map(e => e.msg)
+        const messagesSet = new Set(messages)
+        messages = Array.from(messagesSet)
+
+        req.session.errors = messages.join('\n')
+
+        return res.status(422).redirect(`/reset/${token}`)
     }
 
     try {
@@ -265,6 +262,7 @@ async function postResetPassword(req, res) {
         user.password = newPassword
         user.resetToken = undefined
         user.resetTokenExpiry = undefined
+        req.session.errors = undefined
 
         await user.save()
 

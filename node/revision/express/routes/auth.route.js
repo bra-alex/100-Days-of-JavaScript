@@ -52,7 +52,7 @@ authRouter.post('/signup',
             })
             .normalizeEmail(),
 
-        body('password', 'Password must be at least 6 characters long, contain at least 1 capital letter, 1 number and 1 special character.')
+        body('password', 'Password must be at least 8 characters long, contain at least 1 capital letter, 1 number and 1 special character.')
             .trim()
             .isStrongPassword(),
 
@@ -73,13 +73,20 @@ authRouter.post('/reset',
     body('email')
         .isEmail()
         .withMessage('Invalid email')
-        .normalizeEmail(),
+        .normalizeEmail()
+        .custom(async (value, {req}) =>{
+            const user = await User.findOne({ email: req.body.email })
+
+            if(!user){
+                throw new Error('User not found')
+            }
+        }),
     authController.postReset
 )
 
 authRouter.post('/reset/:resetToken',
     [
-        body('newPassword', 'Password must be at least 6 characters long, contain at least 1 capital letter, 1 number and 1 special character.')
+        body('newPassword', 'Password must be at least 8 characters long, contain at least 1 capital letter, 1 number and 1 special character.')
             .trim()
             .isStrongPassword(),
 
