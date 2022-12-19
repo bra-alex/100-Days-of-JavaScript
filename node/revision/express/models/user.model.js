@@ -26,7 +26,9 @@ const userSchema = new mongoose.Schema({
                 required: true
             }
         }]
-    }
+    },
+    resetToken: String,
+    resetTokenExpiry: Date
 })
 
 userSchema.methods.addToCart = async function (product) {

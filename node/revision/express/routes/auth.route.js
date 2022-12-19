@@ -10,6 +10,9 @@ authRouter.post('/login', authController.postLogin)
 authRouter.get('/signup', authController.getSignUp)
 authRouter.post('/signup', authController.postSignUp)
 
+authRouter.get('/reset', authController.getReset)
+authRouter.post('/reset', authController.postReset)
+
 authRouter.post('/logout', authController.postLogout)
 
 module.exports = authRouter

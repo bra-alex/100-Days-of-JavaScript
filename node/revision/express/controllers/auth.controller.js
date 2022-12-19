@@ -1,20 +1,23 @@
 require('dotenv').config()
 
+const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const nodemailer = require('nodemailer')
-const sendgridTransport = require('nodemailer-sendgrid-transport')
 
 const User = require('../models/user.model')
 
-const transporter = nodemailer.createTransport(sendgridTransport({
+const transporter = nodemailer.createTransport({
+    host: 'smtp.sendgrid.net',
+    port: 587,
     auth: {
-        api_key: process.env.SENDGRID_API_KEY
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY
     }
-}))
+ })
 
 function getLogin(req, res) {
     let message = req.flash('error')
-    if(message.length > 0){
+    if (message.length > 0) {
         message = message[0]
     } else {
         message = null
@@ -29,7 +32,7 @@ function getLogin(req, res) {
 
 function getSignUp(req, res) {
     let message = req.flash('error')
-    if(message.length > 0){
+    if (message.length > 0) {
         message = message[0]
     } else {
         message = null
@@ -42,25 +45,40 @@ function getSignUp(req, res) {
     })
 }
 
+function getReset(req, res) {
+    let message = req.flash('error')
+    if (message.length > 0) {
+        message = message[0]
+    } else {
+        message = null
+    }
+
+    res.render('auth/reset', {
+        pageTitle: 'Reset Password',
+        path: '/reset',
+        errorMessage: message
+    })
+}
+
 async function postLogin(req, res) {
     const email = req.body.email
     const password = req.body.password
 
     try {
-        let user = await User.findOne({email: email})
+        let user = await User.findOne({ email: email })
 
-        if(!user){
-            user = await User.findOne({username: email})
+        if (!user) {
+            user = await User.findOne({ username: email })
         }
-        
-        if(!user){
+
+        if (!user) {
             req.flash('error', 'Invalid email or password')
             return res.redirect('/login')
         }
 
         const passwordEqual = await bcrypt.compare(password, user.password)
 
-        if(!passwordEqual){
+        if (!passwordEqual) {
             req.flash('error', 'Invalid email or password')
             return res.redirect('/login')
         }
@@ -91,7 +109,7 @@ async function postSignUp(req, res) {
         const emailIsEmpty = email.length < 1
         const passwordIsEmpty = password.length < 1
         const confirmPasswordIsEmpty = confirmPassword.length < 1
-        
+
         const usernameExists = await User.findOne({ username: username })
         const emailExists = await User.findOne({ email: email })
 
@@ -110,7 +128,7 @@ async function postSignUp(req, res) {
             return res.redirect('/signup')
         }
 
-        if(confirmPassword !== password){
+        if (confirmPassword !== password) {
             req.flash('error', 'Passwords do not match')
             return res.redirect('/signup')
         }
@@ -134,7 +152,7 @@ async function postSignUp(req, res) {
             subject: 'Yayyyyy',
             html: '<h1> It worked </h1>'
         })
-        console.log('sent')   
+        console.log('sent')
     } catch (e) {
         console.log(e);
     }
@@ -149,10 +167,51 @@ function postLogout(req, res) {
     })
 }
 
+function postReset(req, res) {
+    crypto.randomBytes(32, async (err, buffer) => {
+        if (err) {
+            console.log(err);
+            return res.redirect('/reset')
+        }
+
+        const resetToken = buffer.toString('hex')
+
+        try {
+            const user = await User.findOne({ email: req.body.email })
+
+            if (!user) {
+                req.flash('error', 'User not found.')
+                return res.redirect('/reset')
+            }
+
+            user.resetToken = resetToken
+            user.resetTokenExpiry = Date.now() + (60 * 60 * 1000)
+            await user.save()
+
+            res.redirect('/')
+
+            await transporter.sendMail({
+                to: req.body.email,
+                from: 'aalexanderkwaku@yahoo.co.uk',
+                subject: 'Password Reset',
+                html: `
+                    <p>You have requested to reset your password. This link is active for only one hour</p>
+                    <p>Click <a href="http://localhost:3000/reset/${resetToken}">here</a> to reset your passowrd</p>
+                `
+            })
+            console.log('Email sent');
+        } catch (e) {
+            console.log(e);
+        }
+    })
+}
+
 module.exports = {
     getLogin,
     getSignUp,
+    getReset,
     postLogin,
     postSignUp,
-    postLogout
+    postLogout,
+    postReset
 }
