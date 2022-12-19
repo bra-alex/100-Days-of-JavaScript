@@ -3,6 +3,7 @@ require('dotenv').config()
 const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const nodemailer = require('nodemailer')
+const { validationResult } = require('express-validator')
 
 const User = require('../models/user.model')
 
@@ -16,47 +17,37 @@ const transporter = nodemailer.createTransport({
 })
 
 function getLogin(req, res) {
-    let message = req.flash('error')
-    if (message.length > 0) {
-        message = message[0]
-    } else {
-        message = null
-    }
-
     res.render('auth/login', {
         pageTitle: 'Login',
         path: '/login',
-        errorMessage: message
+        errorMessage: null,
+        oldInput: {
+            email: '',
+            password: ''
+        },
+        errors: []
     })
 }
 
 function getSignUp(req, res) {
-    let message = req.flash('error')
-    if (message.length > 0) {
-        message = message[0]
-    } else {
-        message = null
-    }
-
     res.render('auth/signup', {
         pageTitle: 'Sign Up',
         path: '/signup',
-        errorMessage: message
+        errorMessage: null,
+        oldInput: {
+            username: '',
+            email: '',
+            password: ''
+        },
+        errors: []
     })
 }
 
 function getReset(req, res) {
-    let message = req.flash('error')
-    if (message.length > 0) {
-        message = message[0]
-    } else {
-        message = null
-    }
-
     res.render('auth/reset', {
         pageTitle: 'Reset Password',
         path: '/reset',
-        errorMessage: message
+        errorMessage: null
     })
 }
 
@@ -70,17 +61,10 @@ async function getResetPassword(req, res) {
             return res.redirect('/error')
         }
 
-        let message = req.flash('error')
-        if (message.length > 0) {
-            message = message[0]
-        } else {
-            message = null
-        }
-
         res.render('auth/reset-password', {
             pageTitle: 'Reset Password',
             path: '/reset-password',
-            errorMessage: message,
+            errorMessage: null,
             token: token,
             userId: user._id.toString()
         })
@@ -93,6 +77,20 @@ async function getResetPassword(req, res) {
 async function postLogin(req, res) {
     const email = req.body.email
     const password = req.body.password
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/login', {
+            pageTitle: 'Login',
+            path: '/login',
+            errorMessage: 'Invalid email or password',
+            oldInput: {
+                email: email,
+                password: password
+            },
+            errors: errors.array()
+        })
+    }
 
     try {
         let user = await User.findOne({ email: email })
@@ -101,16 +99,19 @@ async function postLogin(req, res) {
             user = await User.findOne({ username: email })
         }
 
-        if (!user) {
-            req.flash('error', 'Invalid email or password')
-            return res.redirect('/login')
-        }
-
         const passwordEqual = await bcrypt.compare(password, user.password)
 
         if (!passwordEqual) {
-            req.flash('error', 'Invalid email or password')
-            return res.redirect('/login')
+            return res.status(422).render('auth/login', {
+                pageTitle: 'Login',
+                path: '/login',
+                errorMessage: 'Invalid email or password',
+                oldInput: {
+                    email: email,
+                    password: password
+                },
+                errors: errors.array()
+            })
         }
 
         req.session.user = user
@@ -132,37 +133,27 @@ async function postSignUp(req, res) {
     const username = req.body.username
     const email = req.body.email
     const password = req.body.password
-    const confirmPassword = req.body.confirmPassword
+
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        let messages = errors.array().map(e => e.msg)
+        const messagesSet = new Set(messages)
+        messages = Array.from(messagesSet)
+        return res.status(422).render('auth/signup', {
+            pageTitle: 'Sign Up',
+            path: '/signup',
+            errorMessage: messages.join('\n'),
+            oldInput: {
+                username: username,
+                email: email,
+                password: password
+            },
+            errors: errors.array()
+        })
+    }
 
     try {
-        const usernameIsEmpty = username.length < 1
-        const emailIsEmpty = email.length < 1
-        const passwordIsEmpty = password.length < 1
-        const confirmPasswordIsEmpty = confirmPassword.length < 1
-
-        const usernameExists = await User.findOne({ username: username })
-        const emailExists = await User.findOne({ email: email })
-
-        if (usernameIsEmpty || emailIsEmpty || passwordIsEmpty || confirmPasswordIsEmpty) {
-            req.flash('error', 'All fields are required')
-            return res.redirect('/signup')
-        }
-
-        if (usernameExists) {
-            req.flash('error', 'Username in use')
-            return res.redirect('/signup')
-        }
-
-        if (emailExists) {
-            req.flash('error', 'E-mail has been used to register')
-            return res.redirect('/signup')
-        }
-
-        if (confirmPassword !== password) {
-            req.flash('error', 'Passwords do not match')
-            return res.redirect('/signup')
-        }
-
         const hashedPassword = await bcrypt.hash(password, 12)
 
         const user = new User({
@@ -198,6 +189,16 @@ function postLogout(req, res) {
 }
 
 function postReset(req, res) {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/reset', {
+            pageTitle: 'Reset Password',
+            path: '/reset',
+            errorMessage: errors.array()[0].msg
+        })
+    }
+
     crypto.randomBytes(32, async (err, buffer) => {
         if (err) {
             console.log(err);
@@ -240,24 +241,23 @@ async function postResetPassword(req, res) {
     const userId = req.body.userId
     const token = req.params.resetToken
     const password = req.body.newPassword
-    const confirmPassword = req.body.confirmPassword
 
-    if (!password) {
-        req.flash('error', 'Please enter a password')
-        return res.redirect(`/reset/${token}`)
-    }
+    const errors = validationResult(req)
 
-    if (confirmPassword !== password) {
-        req.flash('error', 'Passwords do not match')
-        return res.redirect(`/reset/${token}`)
+    if (!errors.isEmpty()) {
+        return res.status(422).render(`auth/reset/${token}`, {
+            pageTitle: 'Reset Password',
+            path: '/reset',
+            errorMessage: errors.array()[0].msg
+        })
     }
 
     try {
         const user = await User.findOne(
-            { 
-                resetToken: token, 
-                resetTokenExpiry: { $gt: Date.now() }, 
-                _id: userId 
+            {
+                resetToken: token,
+                resetTokenExpiry: { $gt: Date.now() },
+                _id: userId
             })
 
         const newPassword = await bcrypt.hash(password, 12)
