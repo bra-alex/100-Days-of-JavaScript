@@ -15,32 +15,24 @@ adminRouter.post('/add-product', isAuthenticated,
     [
         body('name')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter a product name')
-            .escape(),
+            .isAlphanumeric()
+            .isLength({ min: 3 })
+            .withMessage('Product name should not contain special characters and should be at least 3 characters long'),
 
         body('imageURL')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter an image url')
             .isURL()
             .withMessage('Please enter a valid url'),
 
         body('price')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter a price')
             .isDecimal()
             .withMessage('Price must be a decimal'),
 
         body('description')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter a product description')
+            .isLength({ min: 5 })
+            .withMessage('Product description must be at least 5 characters long')
     ],
     adminController.postAddProduct
 )
@@ -49,32 +41,24 @@ adminRouter.post('/edit-product', isAuthenticated,
     [
         body('name')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter a product name')
-            .escape(),
+            .isAlphanumeric()
+            .isLength({ min: 3 })
+            .withMessage('Product name should not contain special characters and should be at least 3 characters long'),
 
         body('imageURL')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter an image url')
             .isURL()
             .withMessage('Please enter a valid url'),
 
         body('price')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter a price')
             .isDecimal()
             .withMessage('Price must be a decimal'),
 
         body('description')
             .trim()
-            .not()
-            .isEmpty()
-            .withMessage('Please enter a product description')
+            .isLength({ min: 5 })
+            .withMessage('Product description must be at least 5 characters long')
     ],
     adminController.postEditProduct
 )
