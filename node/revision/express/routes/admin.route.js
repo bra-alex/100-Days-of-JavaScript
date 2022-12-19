@@ -41,7 +41,7 @@ adminRouter.post('/edit-product', isAuthenticated,
     [
         body('name')
             .trim()
-            .isAlphanumeric()
+            .isString()
             .isLength({ min: 3 })
             .withMessage('Product name should not contain special characters and should be at least 3 characters long'),
 
