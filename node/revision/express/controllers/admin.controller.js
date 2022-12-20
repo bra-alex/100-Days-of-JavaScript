@@ -1,8 +1,8 @@
 const { validationResult } = require('express-validator')
 
+const deleteFile = require('../util/file')
 const Product = require('../models/product.model')
 const { errorHandler } = require('../controllers/error.controller')
-const { default: next } = require('next')
 
 function getAddProduct(req, res) {
     res.render('admin/edit-product', {
@@ -174,7 +174,7 @@ async function postEditProduct(req, res, next) {
         if (product.userID.toString() !== userID.toString()) {
             return res.redirect('/')
         }
-
+        
         const editedProduct = {
             name,
             description,
@@ -183,7 +183,12 @@ async function postEditProduct(req, res, next) {
             userID
         }
 
+        if (image) {
+            deleteFile(product.imageURL)
+        }
+
         await Product.findByIdAndUpdate(id, editedProduct)
+
         res.redirect('/admin/products')
 
     } catch (e) {
@@ -196,6 +201,10 @@ async function postEditProduct(req, res, next) {
 async function postDeleteProduct(req, res, next) {
     try {
         const id = req.body.productId
+
+        const product = await Product.findOne({ _id: id, userID: req.session.user._id })
+        
+        deleteFile(product.imageURL)
 
         await Product.deleteOne({ _id: id, userID: req.session.user._id })
 
