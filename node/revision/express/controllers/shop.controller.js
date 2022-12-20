@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const PDFDocument = require('pdfkit')
 
 const Order = require('../models/order.model')
 const Product = require('../models/product.model')
@@ -99,7 +100,7 @@ async function getInvoice(req, res, next) {
             throw new Error('Order not found')
         }
 
-        const eligibile = order.user.userId.toString() === req.session._id.toString()
+        const eligibile = order.user.userId.toString() === req.session.user._id.toString()
 
         if (!eligibile) {
             throw new Error('Unauthorised to access this file')
@@ -108,16 +109,26 @@ async function getInvoice(req, res, next) {
         const invoiceName = 'invoice-' + orderId + '.pdf'
         const invoicePath = path.join('data', 'invoices', invoiceName)
 
-        fs.readFile(invoicePath, (err, data) => {
-            if (err) {
-                console.log(err);
-                return next(err)
-            }
-            res.setHeader('Content-Type', 'application/pdf')
-            res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"')
-            res.send(data)
-        })
+        const pdfDoc = new PDFDocument()
+         
 
+        const file = fs.createReadStream(invoicePath)
+
+        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"')
+
+        file.pipe(res)
+        /*
+            fs.readFile(invoicePath, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return next(err)
+                }
+                res.setHeader('Content-Type', 'application/pdf')
+                res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"')
+                res.send(data)
+            })
+        */
     } catch (e) {
         console.log(e);
         errorHandler(e, next(e))
