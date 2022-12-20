@@ -12,6 +12,7 @@ shopRouter.get('/products', shopController.getProducts)
 shopRouter.get('/products/:productId', shopController.getProduct)
 shopRouter.get('/cart', isAuthenticated, shopController.getCart)
 shopRouter.get('/orders', isAuthenticated, shopController.getOrders)
+shopRouter.get('/orders/:orderID', isAuthenticated, shopController.getInvoice)
 shopRouter.get('/checkout', isAuthenticated, shopController.getCheckout)
 
 shopRouter.post('/cart', isAuthenticated, shopController.postCart)

@@ -1,5 +1,8 @@
-const Product = require('../models/product.model')
+const fs = require('fs')
+const path = require('path')
+
 const Order = require('../models/order.model')
+const Product = require('../models/product.model')
 
 const { errorHandler } = require('../controllers/error.controller')
 
@@ -13,7 +16,7 @@ async function getIndex(req, res, next) {
         })
     } catch (e) {
         console.log(e);
-        
+
         errorHandler(e, next)
     }
 
@@ -29,7 +32,7 @@ async function getProducts(req, res, next) {
         })
     } catch (e) {
         console.log(e);
-        
+
         errorHandler(e, next)
     }
 }
@@ -46,7 +49,7 @@ async function getProduct(req, res, next) {
         })
     } catch (e) {
         console.log(e);
-        
+
         errorHandler(e, next)
     }
 }
@@ -66,9 +69,66 @@ async function getCart(req, res, next) {
 
     } catch (e) {
         console.log(e);
-        
+
         errorHandler(e, next)
     }
+}
+
+async function getOrders(req, res, next) {
+    try {
+        const orders = await Order.find({ 'user.userId': req.user._id })
+        res.render('shop/orders', {
+            pageTitle: 'Orders',
+            orders: orders,
+            path: '/orders',
+        })
+
+    } catch (e) {
+        console.log(e);
+
+        errorHandler(e, next)
+    }
+}
+
+async function getInvoice(req, res, next) {
+    const orderId = req.params.orderID
+    try {
+        const order = await Order.findById(orderId)
+
+        if (!order) {
+            throw new Error('Order not found')
+        }
+
+        const eligibile = order.user.userId.toString() === req.session._id.toString()
+
+        if (!eligibile) {
+            throw new Error('Unauthorised to access this file')
+        }
+
+        const invoiceName = 'invoice-' + orderId + '.pdf'
+        const invoicePath = path.join('data', 'invoices', invoiceName)
+
+        fs.readFile(invoicePath, (err, data) => {
+            if (err) {
+                console.log(err);
+                return next(err)
+            }
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"')
+            res.send(data)
+        })
+
+    } catch (e) {
+        console.log(e);
+        errorHandler(e, next(e))
+    }
+}
+
+function getCheckout(req, res) {
+    res.render('shop/checkout', {
+        pageTitle: 'Checkout',
+        path: '/checkout',
+    })
 }
 
 async function postCart(req, res, next) {
@@ -80,7 +140,7 @@ async function postCart(req, res, next) {
 
     } catch (e) {
         console.log(e);
-        
+
         errorHandler(e, next)
     }
 }
@@ -93,7 +153,7 @@ async function postCartDeleteItem(req, res, next) {
 
     } catch (e) {
         console.log(e);
-        
+
         errorHandler(e, next)
     }
 
@@ -124,32 +184,9 @@ async function postOrder(req, res, next) {
 
     } catch (e) {
         console.log(e);
-        
+
         errorHandler(e, next)
     }
-}
-
-async function getOrders(req, res, next) {
-    try {
-        const orders = await Order.find({ 'user.userId': req.user._id })
-        res.render('shop/orders', {
-            pageTitle: 'Orders',
-            orders: orders,
-            path: '/orders',
-        })
-
-    } catch (e) {
-        console.log(e);
-        
-        errorHandler(e, next)
-    }
-}
-
-function getCheckout(req, res) {
-    res.render('shop/checkout', {
-        pageTitle: 'Checkout',
-        path: '/checkout',
-    })
 }
 
 module.exports = {
@@ -157,9 +194,10 @@ module.exports = {
     getProducts,
     getProduct,
     getCart,
+    getOrders,
+    getInvoice,
+    getCheckout,
     postCart,
     postCartDeleteItem,
-    postOrder,
-    getOrders,
-    getCheckout
+    postOrder
 }
