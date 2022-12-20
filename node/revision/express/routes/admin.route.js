@@ -19,11 +19,6 @@ adminRouter.post('/add-product', isAuthenticated,
             .isLength({ min: 3 })
             .withMessage('Product name should not contain special characters and should be at least 3 characters long'),
 
-        body('imageURL')
-            .trim()
-            .isURL()
-            .withMessage('Please enter a valid url'),
-
         body('price')
             .trim()
             .isDecimal()
@@ -44,11 +39,6 @@ adminRouter.post('/edit-product', isAuthenticated,
             .isString()
             .isLength({ min: 3 })
             .withMessage('Product name should not contain special characters and should be at least 3 characters long'),
-
-        body('imageURL')
-            .trim()
-            .isURL()
-            .withMessage('Please enter a valid url'),
 
         body('price')
             .trim()

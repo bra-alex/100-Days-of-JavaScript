@@ -78,10 +78,25 @@ async function getEditProduct(req, res) {
 
 async function postAddProduct(req, res, next) {
     const name = req.body.name
-    const imageURL = req.body.imageURL
+    const image = req.file 
     const price = req.body.price
     const description = req.body.description
     const userID = req.session.user._id
+     
+    if(!image){
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/admin/add-product',
+            editing: false,
+            errorMessage: 'Attached file is not supported',
+            oldInput: {
+                name: name,
+                price: price,
+                description: description
+            },
+            errors: []
+        })
+    }
 
     const errors = validationResult(req)
 
@@ -97,7 +112,6 @@ async function postAddProduct(req, res, next) {
             errorMessage: messages.join('\n'),
             oldInput: {
                 name: name,
-                imageURL: imageURL,
                 price: price,
                 description: description
             },
@@ -108,7 +122,7 @@ async function postAddProduct(req, res, next) {
     try {
         const product = new Product({
             name: name,
-            imageURL: imageURL,
+            imageURL: image.path,
             price: price,
             description: description,
             userID: userID
@@ -121,14 +135,14 @@ async function postAddProduct(req, res, next) {
     } catch (e) {
         console.log(e);
     
-        errorHandler(e, next)
+        errorHandler(e, next) 
     }
 }
 
 async function postEditProduct(req, res, next) {
     const id = req.body.productId
     const name = req.body.name
-    const imageURL = req.body.imageURL
+    const image = req.file
     const price = req.body.price
     const description = req.body.description
     const userID = req.session.user._id
@@ -147,7 +161,6 @@ async function postEditProduct(req, res, next) {
             errorMessage: messages.join('\n'),
             oldInput: {
                 name: name,
-                imageURL: imageURL,
                 price: price,
                 description: description
             },
@@ -156,18 +169,18 @@ async function postEditProduct(req, res, next) {
     }
 
     try {
-        const editedProduct = {
-            name,
-            imageURL,
-            description,
-            price,
-            userID
-        }
-
         const product = await Product.findById(id)
 
         if (product.userID.toString() !== userID.toString()) {
             return res.redirect('/')
+        }
+
+        const editedProduct = {
+            name,
+            description,
+            imageURL: image ? image.path : product.imageURL,
+            price,
+            userID
         }
 
         await Product.findByIdAndUpdate(id, editedProduct)

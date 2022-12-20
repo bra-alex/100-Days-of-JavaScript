@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const path = require('path')
 const csrf = require('csurf')
+const multer = require('multer')
 const express = require('express')
 const flash = require('connect-flash')
 const bodyParser = require('body-parser')
@@ -17,20 +18,42 @@ const errorController = require('./controllers/error.controller')
 
 const User = require('./models/user.model')
 const { mongoConnect } = require('./util/database')
+const isAuthenticated = require('./middleware/isAuthenticated')
 
 const app = express()
 
 const secret = process.env.SESSION_SECRET
+
 const sessionStore = new MongoDBStore({
     uri: process.env.MONGO_URL,
     collection: 'sessions',
 })
 
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images')
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().toISOString() + '-' + file.originalname)
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+        cb(null, true)
+    } else {
+        cb(null, false)
+    }
+}
+
 app.set('view engine', 'ejs')
 app.set('views', 'views')
 
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter}).single('image'))
+
 app.use(express.static(path.join(rootDir, 'public')))
+app.use('/images', express.static(path.join(rootDir, 'images')))
 
 app.use(session({
     secret: secret,
@@ -56,7 +79,7 @@ app.use(async (req, res, next) => {
     try {
         const user = await User.findById(req.session.user._id)
 
-        if(!user){
+        if (!user) {
             return next()
         }
 
@@ -88,15 +111,15 @@ app.use(errorController.get404)
 app.use((error, req, res, next) => {
     res.status(500).render('500', {
         pageTitle: 'Error',
-        path: ''
+        path: '',
     })
 })
 
 async function startServer() {
-     
+
     await mongoConnect()
     app.listen(3000)
-    
+
     // Sequelize
     /*
     try {
