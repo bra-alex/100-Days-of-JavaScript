@@ -7,29 +7,58 @@ const Product = require('../models/product.model')
 
 const { errorHandler } = require('../controllers/error.controller')
 
+const ITEMS_PER_PAGE = 1
+
 async function getIndex(req, res, next) {
+    const page = Math.abs(req.query.page) || 1
+    const skip = (page - 1) * ITEMS_PER_PAGE
+
     try {
-        const products = await Product.find()
+        const numOfProducts = await Product.find().countDocuments()
+        const products = await Product
+            .find()
+            .skip(skip)
+            .limit(ITEMS_PER_PAGE)
+
         res.render('shop/index', {
             pageTitle: 'Shop',
             products: products,
-            path: '/'
+            path: '/',
+            currentPage: page,
+            hasNextPage: ITEMS_PER_PAGE * page < numOfProducts,
+            hasPreviousPage: page > 1,
+            nextPage: page + 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(numOfProducts / ITEMS_PER_PAGE)
         })
     } catch (e) {
         console.log(e);
 
         errorHandler(e, next)
     }
-
 }
 
 async function getProducts(req, res, next) {
+    const page = Math.abs(req.query.page) || 1
+    const skip = (page - 1) * ITEMS_PER_PAGE
+
     try {
-        const products = await Product.find()
+        const numOfProducts = await Product.find().countDocuments()
+        const products = await Product
+            .find()
+            .skip(skip)
+            .limit(ITEMS_PER_PAGE)
+
         res.render('shop/product-list', {
             pageTitle: 'Products',
             products: products,
-            path: '/products'
+            path: '/products',
+            currentPage: page,
+            hasNextPage: ITEMS_PER_PAGE * page < numOfProducts,
+            hasPreviousPage: page > 1,
+            nextPage: page + 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(numOfProducts / ITEMS_PER_PAGE)
         })
     } catch (e) {
         console.log(e);
