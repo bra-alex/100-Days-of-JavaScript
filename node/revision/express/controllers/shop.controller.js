@@ -110,14 +110,41 @@ async function getInvoice(req, res, next) {
         const invoicePath = path.join('data', 'invoices', invoiceName)
 
         const pdfDoc = new PDFDocument()
-         
 
-        const file = fs.createReadStream(invoicePath)
+        pdfDoc.pipe(fs.createWriteStream(invoicePath))
+        pdfDoc.pipe(res)
 
-        res.setHeader('Content-Type', 'application/pdf')
-        res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"')
+        pdfDoc
+            .font('Helvetica-Bold')
+            .fontSize(24)
+            .text('Invoice', {
+                underline: true,
+            })
 
-        file.pipe(res)
+        pdfDoc
+            .font('Helvetica')
+            .fontSize(14)
+            .text('-------------------------------')
+
+        let totalPrice = 0
+
+        order.products.forEach(product => {
+            totalPrice += product.quantity * product.productData.price
+            pdfDoc
+                .font('Helvetica')
+                .text(`${product.productData.name} - ${product.quantity} x GH¢${product.productData.price}`)
+        })
+
+        pdfDoc.moveDown()
+
+        pdfDoc
+            .font('Helvetica')
+            .text(`Total Price: GH¢${totalPrice}`)
+
+        pdfDoc.end()
+
+        res.setHeader('Content-Type', 'application/pdf; charset=UTF-8')
+        res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
         /*
             fs.readFile(invoicePath, (err, data) => {
                 if (err) {
@@ -128,6 +155,13 @@ async function getInvoice(req, res, next) {
                 res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"')
                 res.send(data)
             })
+
+            const file = fs.createReadStream(invoicePath)
+
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"')
+
+            file.pipe(res)
         */
     } catch (e) {
         console.log(e);
