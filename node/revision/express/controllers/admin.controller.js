@@ -220,9 +220,9 @@ async function postEditProduct(req, res, next) {
     }
 }
 
-async function postDeleteProduct(req, res, next) {
+async function deleteProduct(req, res, next) {
     try {
-        const id = req.body.productId
+        const id = req.params.productId
 
         const product = await Product.findOne({ _id: id, userID: req.session.user._id })
 
@@ -230,12 +230,16 @@ async function postDeleteProduct(req, res, next) {
 
         await Product.deleteOne({ _id: id, userID: req.session.user._id })
 
-        res.redirect('/admin/products')
+        res.status(200).json({
+            message: 'Success'
+        })
 
     } catch (e) {
         console.log(e)
 
-        errorHandler(e, next)
+        res.status(500).json({
+            message: 'Failed'
+        })
     }
 }
 
@@ -245,5 +249,5 @@ module.exports = {
     getEditProduct,
     postAddProduct,
     postEditProduct,
-    postDeleteProduct
+    deleteProduct
 }

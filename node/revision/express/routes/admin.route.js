@@ -53,6 +53,6 @@ adminRouter.post('/edit-product', isAuthenticated,
     adminController.postEditProduct
 )
 
-adminRouter.post('/delete-product', isAuthenticated, adminController.postDeleteProduct)
+adminRouter.delete('/product/:productId', isAuthenticated, adminController.deleteProduct)
 
 module.exports = adminRouter
