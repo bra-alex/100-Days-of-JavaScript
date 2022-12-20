@@ -1,8 +1,10 @@
 const Product = require('../models/product.model')
 const Order = require('../models/order.model')
 
-async function getIndex(req, res) {
-    try { 
+const { errorHandler } = require('../controllers/error.controller')
+
+async function getIndex(req, res, next) {
+    try {
         const products = await Product.find()
         res.render('shop/index', {
             pageTitle: 'Shop',
@@ -11,11 +13,13 @@ async function getIndex(req, res) {
         })
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 
 }
 
-async function getProducts(req, res) {
+async function getProducts(req, res, next) {
     try {
         const products = await Product.find()
         res.render('shop/product-list', {
@@ -25,10 +29,12 @@ async function getProducts(req, res) {
         })
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 }
 
-async function getProduct(req, res) {
+async function getProduct(req, res, next) {
     try {
         const productId = req.params.productId
 
@@ -40,41 +46,65 @@ async function getProduct(req, res) {
         })
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 }
 
-async function getCart(req, res) {
-    const user = await req.user.populate('cart.items.productId', 'name')
-    const cart = user.cart.items
+async function getCart(req, res, next) {
+    try {
 
-    res.render('shop/cart', {
-        pageTitle: 'Cart',
-        cart: cart,
-        // totalPrice: cart.totalPrice,
-        path: '/cart'
-    })
+        const user = await req.user.populate('cart.items.productId', 'name')
+        const cart = user.cart.items
+
+        res.render('shop/cart', {
+            pageTitle: 'Cart',
+            cart: cart,
+            // totalPrice: cart.totalPrice,
+            path: '/cart'
+        })
+
+    } catch (e) {
+        console.log(e);
+        
+        errorHandler(e, next)
+    }
 }
 
-async function postCart(req, res) {
+async function postCart(req, res, next) {
     const productId = req.body.productId
-    const product = await Product.findById(productId)
-    await req.user.addToCart(product)
-    return res.redirect('/cart')
+    try {
+        const product = await Product.findById(productId)
+        await req.user.addToCart(product)
+        return res.redirect('/cart')
+
+    } catch (e) {
+        console.log(e);
+        
+        errorHandler(e, next)
+    }
 }
 
-async function postCartDeleteItem(req, res) {
+async function postCartDeleteItem(req, res, next) {
     const productId = req.body.productId
+    try {
 
-    await req.user.removeFromCart(productId)
+        await req.user.removeFromCart(productId)
+
+    } catch (e) {
+        console.log(e);
+        
+        errorHandler(e, next)
+    }
 
     res.redirect('/cart')
 }
 
-async function postOrder(req, res) {
+async function postOrder(req, res, next) {
     try {
         const user = await req.user.populate('cart.items.productId')
         const productDetails = user.cart.items.map(p => {
-            return { quantity: p.quantity, productData: {...p.productId._doc} }
+            return { quantity: p.quantity, productData: { ...p.productId._doc } }
         })
 
         const order = new Order({
@@ -91,22 +121,27 @@ async function postOrder(req, res) {
         console.log("Order Added");
 
         res.redirect('/orders')
+
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 }
 
-async function getOrders(req, res) {
+async function getOrders(req, res, next) {
     try {
-        const orders = await Order.find({'user.userId': req.user._id})
+        const orders = await Order.find({ 'user.userId': req.user._id })
         res.render('shop/orders', {
             pageTitle: 'Orders',
             orders: orders,
             path: '/orders',
-            
         })
+
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 }
 
@@ -114,7 +149,6 @@ function getCheckout(req, res) {
     res.render('shop/checkout', {
         pageTitle: 'Checkout',
         path: '/checkout',
-        
     })
 }
 

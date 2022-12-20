@@ -1,6 +1,8 @@
 const { validationResult } = require('express-validator')
 
 const Product = require('../models/product.model')
+const { errorHandler } = require('../controllers/error.controller')
+const { default: next } = require('next')
 
 function getAddProduct(req, res) {
     res.render('admin/edit-product', {
@@ -28,6 +30,8 @@ async function getProducts(req, res) {
         })
     } catch (e) {
         console.log(e);
+    
+        errorHandler(e, next)
     }
 }
 
@@ -67,10 +71,12 @@ async function getEditProduct(req, res) {
         })
     } catch (e) {
         console.log(e);
+    
+        errorHandler(e, next)
     }
 }
 
-async function postAddProduct(req, res) {
+async function postAddProduct(req, res, next) {
     const name = req.body.name
     const imageURL = req.body.imageURL
     const price = req.body.price
@@ -100,8 +106,6 @@ async function postAddProduct(req, res) {
     }
 
     try {
-
-
         const product = new Product({
             name: name,
             imageURL: imageURL,
@@ -109,23 +113,26 @@ async function postAddProduct(req, res) {
             description: description,
             userID: userID
         })
+
         await product.save()
         console.log('Saved');
         res.redirect('/admin/products')
+
     } catch (e) {
         console.log(e);
+    
+        errorHandler(e, next)
     }
-
 }
 
-async function postEditProduct(req, res) {
+async function postEditProduct(req, res, next) {
     const id = req.body.productId
     const name = req.body.name
     const imageURL = req.body.imageURL
     const price = req.body.price
     const description = req.body.description
     const userID = req.session.user._id
-    
+
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
@@ -165,20 +172,26 @@ async function postEditProduct(req, res) {
 
         await Product.findByIdAndUpdate(id, editedProduct)
         res.redirect('/admin/products')
+
     } catch (e) {
         console.log(e);
+    
+        errorHandler(e, next)
     }
 }
 
-async function postDeleteProduct(req, res) {
+async function postDeleteProduct(req, res, next) {
     try {
         const id = req.body.productId
 
         await Product.deleteOne({ _id: id, userID: req.session.user._id })
 
         res.redirect('/admin/products')
+
     } catch (e) {
-        console.log(e);
+        console.log(e)
+
+        errorHandler(e, next)
     }
 }
 

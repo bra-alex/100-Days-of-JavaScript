@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer')
 const { validationResult } = require('express-validator')
 
 const User = require('../models/user.model')
+const { errorHandler } = require('../controllers/error.controller')
 
 const transporter = nodemailer.createTransport({
     host: process.env.SENDGRID_SMTP_HOST,
@@ -51,7 +52,7 @@ function getReset(req, res) {
     })
 }
 
-async function getResetPassword(req, res) {
+async function getResetPassword(req, res, next) {
     try {
         const token = req.params.resetToken
 
@@ -68,13 +69,16 @@ async function getResetPassword(req, res) {
             token: token,
             userId: user._id.toString()
         })
+
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 
 }
 
-async function postLogin(req, res) {
+async function postLogin(req, res, next) {
     const email = req.body.email
     const password = req.body.password
     const errors = validationResult(req)
@@ -126,10 +130,12 @@ async function postLogin(req, res) {
 
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 }
 
-async function postSignUp(req, res) {
+async function postSignUp(req, res, next) {
     const username = req.body.username
     const email = req.body.email
     const password = req.body.password
@@ -173,22 +179,28 @@ async function postSignUp(req, res) {
             subject: 'Yayyyyy',
             html: '<h1> It worked </h1>'
         })
+
         console.log('sent')
+
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 }
 
-function postLogout(req, res) {
+function postLogout(req, res, next) {
     req.session.destroy((err) => {
         if (err) {
-            return console.error(err);
+            console.error(err);
+            
+            errorHandler(e, next)
         }
         res.redirect('/')
     })
 }
 
-function postReset(req, res) {
+function postReset(req, res, next) {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
@@ -225,14 +237,18 @@ function postReset(req, res) {
                     <p>Click <a href="http://localhost:3000/reset/${resetToken}">here</a> to reset your passowrd</p>
                 `
             })
+
             console.log('Email sent');
+
         } catch (e) {
             console.log(e);
+            
+            errorHandler(e, next)
         }
     })
 }
 
-async function postResetPassword(req, res) {
+async function postResetPassword(req, res, next) {
     const userId = req.body.userId
     const token = req.params.resetToken
     const password = req.body.newPassword
@@ -269,8 +285,11 @@ async function postResetPassword(req, res) {
         console.log('Password Reset');
 
         res.redirect('/login')
+
     } catch (e) {
         console.log(e);
+        
+        errorHandler(e, next)
     }
 }
 

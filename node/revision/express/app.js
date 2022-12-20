@@ -13,9 +13,10 @@ const authRouter = require('./routes/auth.route')
 const shopRouter = require('./routes/shop.route')
 const adminRouter = require('./routes/admin.route')
 
+const errorController = require('./controllers/error.controller')
+
 const User = require('./models/user.model')
 const { mongoConnect } = require('./util/database')
-const errorController = require('./controllers/error.controller')
 
 const app = express()
 
@@ -41,6 +42,12 @@ app.use(session({
 app.use(csrf())
 app.use(flash())
 
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn
+    res.locals.csrfToken = req.csrfToken()
+    next()
+})
+
 app.use(async (req, res, next) => {
     if (!req.session.user) {
         return next()
@@ -48,10 +55,17 @@ app.use(async (req, res, next) => {
 
     try {
         const user = await User.findById(req.session.user._id)
+
+        if(!user){
+            return next()
+        }
+
         req.user = user
         next()
     } catch (e) {
         console.log(e);
+
+        errorController.errorHandler(e, next)
     }
     // Sequelize
     /*
@@ -65,17 +79,18 @@ app.use(async (req, res, next) => {
     */
 })
 
-app.use((req, res, next) => {
-    res.locals.isAuthenticated = req.session.isLoggedIn
-    res.locals.csrfToken = req.csrfToken()
-    next()
-})
-
 app.use(shopRouter)
 app.use(authRouter)
 app.use('/admin', adminRouter)
 
 app.use(errorController.get404)
+
+app.use((error, req, res, next) => {
+    res.status(500).render('500', {
+        pageTitle: 'Error',
+        path: ''
+    })
+})
 
 async function startServer() {
      
