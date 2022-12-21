@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = require('path')
 const { validationResult } = require('express-validator');
+
 const errorHandler = require('../util/errorHandler')
 
 const Post = require('../models/post.model')
@@ -21,7 +24,7 @@ async function getPost(req, res, next) {
     try {
         const post = await Post.findById(postId)
 
-        if(!post){
+        if (!post) {
             const e = new Error('Post not found')
             e.statusCode = 404
             throw e
@@ -41,17 +44,26 @@ async function createPost(req, res, next) {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        errorHandler('Incorrect data provided', 422, next)
+        const e = new Error('Incorrect data provided')
+        e.statusCode = 422
+        throw e
+    }
+
+    if (!req.file) {
+        const e = new Error('No image provided.')
+        e.statusCode = 422
+        throw e
     }
 
     try {
         const title = req.body.title
         const content = req.body.content
+        const imageURL = req.file.path
 
         const post = new Post({
             title,
             content,
-            imageURL: 'images/rubber-ducky.jpg',
+            imageURL,
             creator: {
                 name: 'Alex A'
             },
@@ -69,8 +81,79 @@ async function createPost(req, res, next) {
     }
 }
 
+async function updatePost(req, res, next) {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        const e = new Error('Incorrect data provided')
+        e.statusCode = 422
+        throw e
+    }
+
+    const postId = req.params.postID
+    const title = req.body.title
+    const content = req.body.content
+    let imageURL = req.body.imageURL
+    
+    if(req.file){
+        imageURL = req.file.path
+    }
+
+    if (!imageURL) {
+        const e = new Error('No image provided.')
+        e.statusCode = 422
+        throw e
+    }
+
+    try {
+        const post = await Post.findById(postId)
+
+        if (!post) {
+            const e = new Error('Post not found')
+            e.statusCode = 404
+            throw e
+        }
+
+        const updatedPost = {
+            title,
+            content,
+            imageURL,
+            creator: {
+                name: 'Alex A'
+            },
+        }
+
+        if(req.file){
+            deleteImage(post.imageURL)
+        }
+
+        await Post.findByIdAndUpdate(postId, updatedPost)
+        console.log('Updated');
+
+        res.status(200).json({
+            message: 'Post updated',
+            post: updatedPost
+        })
+    } catch (e) {
+        console.log(e);
+        errorHandler(e, next)
+    }
+}
+
+const deleteImage = filePath => {
+    
+    filePath = path.join(__dirname, '..', filePath)
+    
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            throw new Error(err)
+        }
+    })
+}
+
 module.exports = {
     getPosts,
     getPost,
-    createPost
+    createPost,
+    updatePost
 }

@@ -16,7 +16,7 @@ class SinglePost extends Component {
 
   componentDidMount() {
     const postId = this.props.match.params.postId;
-    fetch(`${HOST}/feed/posts/${postId}`)
+    fetch(`${HOST}/feed/post/${postId}`)
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch status');
