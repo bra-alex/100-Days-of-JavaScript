@@ -6,6 +6,8 @@ const feedController = require('../controllers/feed.controller')
 const feedRouter = express.Router()
 
 feedRouter.get('/posts', feedController.getPosts)
+feedRouter.get('/posts/:postID', feedController.getPost)
+
 feedRouter.post('/post',
     [
         body('title')

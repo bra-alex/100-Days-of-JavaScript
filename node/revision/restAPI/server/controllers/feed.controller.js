@@ -1,30 +1,47 @@
-const { validationResult } = require('express-validator')
+const { validationResult } = require('express-validator');
+const errorHandler = require('../util/errorHandler')
 
 const Post = require('../models/post.model')
 
-async function getPosts(req, res) {
+async function getPosts(req, res, next) {
     try {
         const posts = await Post.find()
         res.status(200).json({
             posts
         })
-        
+
     } catch (e) {
         console.log(e);
-        res.status(500).json({
-            message: `Couldn't fetch posts from database`
-        })
+        errorHandler(e, next)
     }
 }
 
-async function createPost(req, res) {
+async function getPost(req, res, next) {
+    const postId = req.params.postID
+    try {
+        const post = await Post.findById(postId)
+
+        if(!post){
+            const e = new Error('Post not found')
+            e.statusCode = 404
+            throw e
+        }
+
+        res.status(200).json({
+            post
+        })
+
+    } catch (e) {
+        console.log(e);
+        errorHandler(e, next)
+    }
+}
+
+async function createPost(req, res, next) {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({
-            message: 'Incorrect data provided',
-            errors: errors.array()
-        })
+        errorHandler('Incorrect data provided', 422, next)
     }
 
     try {
@@ -48,13 +65,12 @@ async function createPost(req, res) {
         })
     } catch (e) {
         console.log(e);
-        res.status(500).json({
-            message: `Couldn't save post to database`
-        })
+        errorHandler(e, next)
     }
 }
 
 module.exports = {
     getPosts,
+    getPost,
     createPost
 }
