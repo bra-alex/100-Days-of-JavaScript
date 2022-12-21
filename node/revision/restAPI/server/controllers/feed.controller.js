@@ -140,6 +140,32 @@ async function updatePost(req, res, next) {
     }
 }
 
+async function deletePost(req, res, next) {
+    const postId = req.params.postID
+
+    try {
+        const post = await Post.findById(postId)
+
+        if (!post) {
+            const e = new Error('Post not found')
+            e.statusCode = 404
+            throw e
+        }
+
+        deleteImage(post.imageURL)
+
+        await Post.findByIdAndDelete({_id: postId})
+        console.log('Deleted');
+
+        res.status(200).json({
+            message: 'Post deleted'
+        })
+    } catch (e) {
+        console.log(e);
+        errorHandler(e, next)
+    }
+}
+
 const deleteImage = filePath => {
     
     filePath = path.join(__dirname, '..', filePath)
@@ -155,5 +181,6 @@ module.exports = {
     getPosts,
     getPost,
     createPost,
-    updatePost
+    updatePost,
+    deletePost
 }

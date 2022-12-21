@@ -34,6 +34,6 @@ feedRouter.put('/post/:postID',
     feedController.updatePost
 )
 
-// feedRouter.delete('/posts/:postID', feedController.deletePost)
+feedRouter.delete('/post/:postID', feedController.deletePost)
 
 module.exports = feedRouter
