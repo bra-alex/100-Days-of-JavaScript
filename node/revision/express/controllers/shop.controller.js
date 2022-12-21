@@ -1,13 +1,16 @@
+require('dotenv').config()
+
 const fs = require('fs')
 const path = require('path')
 const PDFDocument = require('pdfkit')
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 const Order = require('../models/order.model')
 const Product = require('../models/product.model')
 
 const { errorHandler } = require('../controllers/error.controller')
 
-const ITEMS_PER_PAGE = 1
+const ITEMS_PER_PAGE = 3
 
 async function getIndex(req, res, next) {
     const page = Math.abs(req.query.page) || 1
@@ -104,6 +107,51 @@ async function getCart(req, res, next) {
     }
 }
 
+async function getCheckout(req, res, next) {
+    const DOMAIN_URL = `${req.protocol}://${req.get('host')}`
+    try {
+        const user = await req.user.populate('cart.items.productId')
+        const cart = user.cart.items
+        const totalPrice = cart
+            .map(items => ({ quantity: items.quantity, price: items.productId.price }))
+            .map(prices => prices.quantity * prices.price)
+            .reduce((accumulator, currentValue) => accumulator + currentValue)
+
+        // const products = 
+        // console.log(products);
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: cart.map(p => {
+                return {
+                    price_data: {
+                        unit_amount: p.productId.price * 100,
+                        currency: 'usd',
+                        product_data: {
+                            name: p.productId.name,
+                            description: p.productId.description,
+                        }
+                    },
+                    quantity: p.quantity
+                }
+            }),
+            mode: 'payment',
+            success_url: `${DOMAIN_URL}/checkout/success`,
+            cancel_url: `${DOMAIN_URL}/checkout/cancel`
+        })
+
+        res.render('shop/checkout', {
+            pageTitle: 'Checkout',
+            path: '/checkout',
+            cart: cart,
+            totalPrice: totalPrice,
+            sessionId: session.id
+        })
+    } catch (e) {
+        console.log(e);
+        errorHandler(e, next)
+    }
+}
+
 async function getOrders(req, res, next) {
     try {
         const orders = await Order.find({ 'user.userId': req.user._id })
@@ -196,13 +244,6 @@ async function getInvoice(req, res, next) {
         console.log(e);
         errorHandler(e, next(e))
     }
-}
-
-function getCheckout(req, res) {
-    res.render('shop/checkout', {
-        pageTitle: 'Checkout',
-        path: '/checkout',
-    })
 }
 
 async function postCart(req, res, next) {
