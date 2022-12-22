@@ -2,9 +2,8 @@ const fs = require('fs');
 const path = require('path')
 const { validationResult } = require('express-validator');
 
-const errorHandler = require('../util/errorHandler')
-
 const Post = require('../models/post.model')
+const errorHandler = require('../util/errorHandler')
 
 async function getPosts(req, res, next) {
     const page = Math.abs(req.query.page) || 1

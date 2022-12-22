@@ -5,7 +5,8 @@ const multer = require('multer')
 
 const { mongoConnect } = require('./util/database')
 
-const feedRouter = require('./routes/feed.route')
+const feedRoutes = require('./routes/feed.route')
+const authRoutes = require('./routes/auth.route')
 
 const PORT = 8080
 
@@ -49,7 +50,8 @@ app.use((req, res, next) => {
 })
 */
 
-app.use('/feed', feedRouter)
+app.use('/feed', feedRoutes)
+app.use('/auth', authRoutes)
 
 app.use((error, req, res, next) => {
     res.status(error.statusCode).json({
