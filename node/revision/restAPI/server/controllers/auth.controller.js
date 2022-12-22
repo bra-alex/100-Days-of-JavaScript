@@ -7,16 +7,16 @@ const errorHandler = require('../util/errorHandler')
 
 async function signup(req, res, next) { 
     const errors = validationResult(req)
+    const name = req.body.name
+    const email = req.body.email
+    const password = req.body.password
 
     if (!errors.isEmpty()) {
         const e = new Error('Incorrect data provided')
         e.statusCode = 422
-        throw e
+        e.data = errors.array()
+        return errorHandler(e, next)
     }
-    
-    const name = req.body.name
-    const email = req.body.email
-    const password = req.body.password
 
     try {
         const encryptedPassword = await bcrypt.hash(password, 12)
@@ -34,7 +34,7 @@ async function signup(req, res, next) {
             userId: user._id
         })
     } catch (e) {
-        errorHandler(e, next)
+        next(e)
     }
 }
 

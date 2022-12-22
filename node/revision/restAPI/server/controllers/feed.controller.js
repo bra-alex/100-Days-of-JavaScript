@@ -3,12 +3,14 @@ const path = require('path')
 const { validationResult } = require('express-validator');
 
 const Post = require('../models/post.model')
+const User = require('../models/user.model')
+
 const errorHandler = require('../util/errorHandler')
 
 async function getPosts(req, res, next) {
-    const page = Math.abs(req.query.page) || 1
-    const limit = 2
     try {
+        const page = Math.abs(req.query.page) || 1
+        const limit = 2
         const totalItems = await Post.find().countDocuments()
 
         const posts = await Post
@@ -28,8 +30,8 @@ async function getPosts(req, res, next) {
 }
 
 async function getPost(req, res, next) {
-    const postId = req.params.postID
     try {
+        const postId = req.params.postID
         const post = await Post.findById(postId)
 
         if (!post) {
@@ -49,39 +51,49 @@ async function getPost(req, res, next) {
 }
 
 async function createPost(req, res, next) {
-    const errors = validationResult(req)
-
-    if (!errors.isEmpty()) {
-        const e = new Error('Incorrect data provided')
-        e.statusCode = 422
-        throw e
-    }
-
-    if (!req.file) {
-        const e = new Error('No image provided.')
-        e.statusCode = 422
-        throw e
-    }
-
     try {
+        const errors = validationResult(req)
+
+        if (!errors.isEmpty()) {
+            const e = new Error('Incorrect data provided')
+            e.statusCode = 422
+            throw e
+        }
+
+        if (!req.file) {
+            const e = new Error('No image provided.')
+            e.statusCode = 422
+            throw e
+        }
+
         const title = req.body.title
         const content = req.body.content
         const imageURL = req.file.path
+        const creator = req.userId
 
         const post = new Post({
             title,
             content,
             imageURL,
-            creator: {
-                name: 'Alex A'
-            },
+            creator
         })
 
         const addedPost = await post.save()
+        console.log('Post created');
 
+        const user = await User.findById(creator)
+        user.posts.push(addedPost)
+
+        await user.save()
+
+        console.log();
         res.status(201).json({
             message: 'Post created',
-            post: addedPost
+            post: addedPost,
+            creator: {
+                _id: user._id,
+                name: user.name
+            }
         })
     } catch (e) {
         console.log(e);
@@ -90,30 +102,31 @@ async function createPost(req, res, next) {
 }
 
 async function updatePost(req, res, next) {
-    const errors = validationResult(req)
-
-    if (!errors.isEmpty()) {
-        const e = new Error('Incorrect data provided')
-        e.statusCode = 422
-        throw e
-    }
-
-    const postId = req.params.postID
-    const title = req.body.title
-    const content = req.body.content
-    let imageURL = req.body.imageURL
-
-    if (req.file) {
-        imageURL = req.file.path
-    }
-
-    if (!imageURL) {
-        const e = new Error('No image provided.')
-        e.statusCode = 422
-        throw e
-    }
-
     try {
+        const errors = validationResult(req)
+
+        if (!errors.isEmpty()) {
+            const e = new Error('Incorrect data provided')
+            e.statusCode = 422
+            throw e
+        }
+
+        const postId = req.params.postID
+        const title = req.body.title
+        const content = req.body.content
+        const creator = req.userId
+        let imageURL = req.body.image
+
+        if (req.file) {
+            imageURL = req.file.path
+        }
+
+        if (!imageURL) {
+            const e = new Error('No image provided.')
+            e.statusCode = 422
+            throw e
+        }
+
         const post = await Post.findById(postId)
 
         if (!post) {
@@ -122,13 +135,17 @@ async function updatePost(req, res, next) {
             throw e
         }
 
+        if (post.creator.toString() !== req.userId.toString()) {
+            const e = new Error('Unauthorised to update this post')
+            e.statusCode = 403
+            throw e
+        }
+
         const updatedPost = {
             title,
             content,
             imageURL,
-            creator: {
-                name: 'Alex A'
-            },
+            creator
         }
 
         if (req.file) {
@@ -149,9 +166,9 @@ async function updatePost(req, res, next) {
 }
 
 async function deletePost(req, res, next) {
-    const postId = req.params.postID
-
     try {
+        const postId = req.params.postID
+
         const post = await Post.findById(postId)
 
         if (!post) {
@@ -160,10 +177,21 @@ async function deletePost(req, res, next) {
             throw e
         }
 
+        if (post.creator.toString() !== req.userId.toString()) {
+            const e = new Error('Unauthorised to delete this post')
+            e.statusCode = 403
+            throw e
+        }
+
         deleteImage(post.imageURL)
 
-        await Post.findByIdAndDelete({ _id: postId })
+        await Post.findByIdAndDelete(postId)
         console.log('Deleted');
+
+        const user = await User.findById(req.userId)
+        user.posts.pull(postId)
+
+        await user.save()
 
         res.status(200).json({
             message: 'Post deleted'
