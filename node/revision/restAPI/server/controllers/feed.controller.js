@@ -15,6 +15,7 @@ async function getPosts(req, res, next) {
 
         const posts = await Post
             .find()
+            .populate('creator', 'name')
             .skip((page - 1) * limit)
             .limit(limit)
 
