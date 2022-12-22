@@ -7,10 +7,19 @@ const errorHandler = require('../util/errorHandler')
 const Post = require('../models/post.model')
 
 async function getPosts(req, res, next) {
+    const page = Math.abs(req.query.page) || 1
+    const limit = 2
     try {
-        const posts = await Post.find()
+        const totalItems = await Post.find().countDocuments()
+
+        const posts = await Post
+            .find()
+            .skip((page - 1) * limit)
+            .limit(limit)
+
         res.status(200).json({
-            posts
+            posts,
+            totalItems
         })
 
     } catch (e) {
@@ -94,8 +103,8 @@ async function updatePost(req, res, next) {
     const title = req.body.title
     const content = req.body.content
     let imageURL = req.body.imageURL
-    
-    if(req.file){
+
+    if (req.file) {
         imageURL = req.file.path
     }
 
@@ -123,7 +132,7 @@ async function updatePost(req, res, next) {
             },
         }
 
-        if(req.file){
+        if (req.file) {
             deleteImage(post.imageURL)
         }
 
@@ -154,7 +163,7 @@ async function deletePost(req, res, next) {
 
         deleteImage(post.imageURL)
 
-        await Post.findByIdAndDelete({_id: postId})
+        await Post.findByIdAndDelete({ _id: postId })
         console.log('Deleted');
 
         res.status(200).json({
@@ -167,9 +176,9 @@ async function deletePost(req, res, next) {
 }
 
 const deleteImage = filePath => {
-    
+
     filePath = path.join(__dirname, '..', filePath)
-    
+
     fs.unlink(filePath, (err) => {
         if (err) {
             throw new Error(err)
