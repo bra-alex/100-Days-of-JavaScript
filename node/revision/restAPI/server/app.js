@@ -64,6 +64,6 @@ app.use((error, req, res, next) => {
 async function startServer() {
     await mongoConnect()
     app.listen(PORT, () => console.log('Listening on port: ', PORT))
-}
+} 
 
 startServer()
