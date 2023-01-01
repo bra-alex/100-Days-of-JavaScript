@@ -11,5 +11,13 @@ module.exports = {
         productsByPrice: (_, args) => {
             return productsModel.getProductsInPriceRange(args.minPrice, args.maxPrice)
         }
+    },
+    Mutation:{
+        addNewProduct: (_, args) => {
+            return productsModel.addNewProduct(args.id, args.description, args.price)
+        },
+        addNewReview: (_, args) => {
+            return productsModel.addNewReview(args.productId, args.rating, args.comment)
+        }
     }
 }

@@ -51,7 +51,7 @@ function addNewProduct(id, description, price) {
 function addNewReview(id, rating, comment) {
     const product = getProductById(id)
 
-    if (product) {1
+    if (product) {
         const review = {
             rating,
             comment,
