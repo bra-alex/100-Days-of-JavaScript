@@ -1,28 +1,18 @@
+const path = require('path')
 const express = require('express')
-const { buildSchema } = require('graphql')
+const { loadFilesSync } = require('@graphql-tools/load-files')
 const { createHandler } = require('graphql-http/lib/use/express')
+const { makeExecutableSchema } = require('@graphql-tools/schema')
 
-const schema = buildSchema(`
-    type Query {
-        products: [Product]
-    }
+const typesArray = loadFilesSync(path.join(__dirname, '**/*.graphql'))
 
-    type Product{
-        id: ID!
-        description: String!
-        price: Float!
-        reviews: [Review]
-    }
-
-    type Review{
-        rating: Int!
-        comment: String
-    }
-`)
+const schema = makeExecutableSchema({
+    typeDefs: typesArray
+})
 
 const root = {
-    description: 'Red Shoe',
-    price: 1.2
+    products: require('./products/products.model'),
+    orders: require('./orders/orders.model'),
 }
 
 const PORT = 3000
