@@ -5,9 +5,11 @@ const { createHandler } = require('graphql-http/lib/use/express')
 const { makeExecutableSchema } = require('@graphql-tools/schema')
 
 const typesArray = loadFilesSync(path.join(__dirname, '**/*.graphql'))
+const resolversArray = loadFilesSync(path.join(__dirname, '**/*.resolvers.js'))
 
 const schema = makeExecutableSchema({
-    typeDefs: typesArray
+    typeDefs: typesArray,
+    resolvers: resolversArray
 })
 
 const root = {
