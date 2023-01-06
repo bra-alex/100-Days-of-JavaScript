@@ -63,7 +63,13 @@ app.use((error, req, res, next) => {
 
 async function startServer() {
     await mongoConnect()
-    app.listen(PORT, () => console.log('Listening on port: ', PORT))
+    const server = app.listen(PORT, () => console.log('Listening on port: ', PORT))
+
+    const io = require('./socket').init(server)
+
+    io.on('connection', socket => {
+        console.log('Client connected');
+    })
 } 
 
 startServer()
