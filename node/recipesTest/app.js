@@ -39,6 +39,9 @@ app.use(express.json())
 // app.use('/auth', authRouter)
 // app.use('/recipes', isLoggedIn, recipeRouter)
 app.use('/recipes', recipeRouter)
+app.use('/', (req, res) => {
+	res.redirect('/recipes')
+})
 
 // app.use('/', (req, res) => {
 //     res.sendFile(path.join(__dirname, 'view', 'index.html'))
